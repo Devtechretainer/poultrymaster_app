@@ -9,6 +9,7 @@ class SummaryCard {
   final bool isPositiveTrend;
   final IconData icon;
   final Color iconColor;
+  final String? route; // Route to navigate to when card is clicked
 
   const SummaryCard({
     required this.title,
@@ -17,6 +18,7 @@ class SummaryCard {
     this.isPositiveTrend = true,
     required this.icon,
     required this.iconColor,
+    this.route,
   });
 }
 

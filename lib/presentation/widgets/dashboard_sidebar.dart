@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Presentation Widget - Dashboard Sidebar Navigation
+/// Matches the frontend FarmArchive design exactly
 class DashboardSidebar extends StatelessWidget {
   final String currentRoute;
   final Function(String) onNavigate;
@@ -16,161 +17,135 @@ class DashboardSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 250,
-      color: const Color(0xFF1A1F2E), // Dark blue
+      width: 224, // w-56 = 224px (matches frontend)
+      color: const Color(0xFF0F172A), // bg-slate-900
       child: Column(
         children: [
-          // Logo
+          // Logo Section
           Container(
-            padding: const EdgeInsets.all(20),
+            height: 64, // h-16 = 64px
+            padding: const EdgeInsets.symmetric(horizontal: 12), // px-3
             child: Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.orange, Colors.amber],
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.agriculture, color: Colors.white),
-                ),
-                const SizedBox(width: 12),
+                // Colorful Cube Logo (matching frontend SVG)
+                _buildCubeLogo(),
+                const SizedBox(width: 8), // gap-2
                 const Text(
-                  'Poult',
+                  'Poultry Core',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 14, // text-sm
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(color: Colors.white24, height: 1),
+
           // Navigation Items
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              children: [
-                _NavItem(
-                  icon: Icons.home,
-                  title: 'Overview',
-                  isSelected: currentRoute == '/overview',
-                  onTap: () => onNavigate('/overview'),
-                ),
-                _NavItem(
-                  icon: Icons.people,
-                  title: 'Customers',
-                  onTap: () => onNavigate('/customers'),
-                ),
-                _NavItem(
-                  icon: Icons.groups,
-                  title: 'Flock Batch',
-                  onTap: () => onNavigate('/flock-batch'),
-                ),
-                _NavItem(
-                  icon: Icons.pets,
-                  title: 'Flocks',
-                  onTap: () => onNavigate('/flocks'),
-                ),
-                _NavItem(
-                  icon: Icons.description,
-                  title: 'Production',
-                  onTap: () => onNavigate('/production'),
-                ),
-                _NavItem(
-                  icon: Icons.circle,
-                  title: 'Egg Production',
-                  onTap: () => onNavigate('/egg-production'),
-                ),
-                _NavItem(
-                  icon: Icons.inventory,
-                  title: 'Feed Usage',
-                  onTap: () => onNavigate('/feed-usage'),
-                ),
-                _NavItem(
-                  icon: Icons.warning,
-                  title: 'Health',
-                  onTap: () => onNavigate('/health'),
-                ),
-                _NavItem(
-                  icon: Icons.inventory_2,
-                  title: 'Inventory',
-                  onTap: () => onNavigate('/inventory'),
-                ),
-                _NavItem(
-                  icon: Icons.shopping_cart,
-                  title: 'Supplies',
-                  onTap: () => onNavigate('/supplies'),
-                ),
-                _NavItem(
-                  icon: Icons.point_of_sale,
-                  title: 'Sales',
-                  onTap: () => onNavigate('/sales'),
-                ),
-                _NavItem(
-                  icon: Icons.payments,
-                  title: 'Expenses',
-                  onTap: () => onNavigate('/expenses'),
-                ),
-                _NavItem(
-                  icon: Icons.book,
-                  title: 'Resources',
-                  onTap: () => onNavigate('/resources'),
-                ),
-                _NavItem(
-                  icon: Icons.people_outline,
-                  title: 'Employees',
-                  onTap: () => onNavigate('/employees'),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Divider(color: Colors.white24),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text(
-                    'SYSTEM',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 16,
+              ), // px-3 pb-4
+              child: ListView(
+                children: [
+                  // Main Navigation Items
+                  _buildNavItem(Icons.home, 'Overview', '/dashboard'),
+                  _buildNavItem(Icons.people, 'Customers', '/customers'),
+                  _buildNavItem(Icons.eco, 'Flock Batch', '/flock-batch'),
+                  _buildNavItem(Icons.eco, 'Flocks', '/flocks'),
+                  _buildNavItem(
+                    Icons.description,
+                    'Production',
+                    '/production-records',
+                  ),
+                  _buildNavItem(
+                    Icons.whatshot,
+                    'Egg Production',
+                    '/egg-production',
+                  ),
+                  _buildNavItem(Icons.inventory, 'Feed Usage', '/feed-usage'),
+                  _buildNavItem(Icons.warning, 'Health', '/health'),
+                  _buildNavItem(Icons.inventory_2, 'Inventory', '/inventory'),
+                  _buildNavItem(Icons.shopping_cart, 'Supplies', '/supplies'),
+                  _buildNavItem(Icons.shopping_bag, 'Sales', '/sales'),
+                  _buildNavItem(Icons.attach_money, 'Expenses', '/expenses'),
+                  _buildNavItem(Icons.book, 'Resources', '/resources'),
+                  _buildNavItem(
+                    Icons.person_outline,
+                    'Employees',
+                    '/employees',
+                  ),
+
+                  const SizedBox(
+                    height: 28,
+                  ), // gap-y-7 spacing before System section
+                  // System Section
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    child: Text(
+                      'SYSTEM',
+                      style: TextStyle(
+                        color: Color(0xFF94A3B8), // text-slate-400
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.05,
+                      ),
                     ),
                   ),
-                ),
-                _NavItem(
-                  icon: Icons.bar_chart,
-                  title: 'Reports',
-                  onTap: () => onNavigate('/reports'),
-                ),
-                _NavItem(
-                  icon: Icons.account_circle,
-                  title: 'Account',
-                  onTap: () => onNavigate('/account'),
-                ),
-                _NavItem(
-                  icon: Icons.home_work,
-                  title: 'Houses',
-                  onTap: () => onNavigate('/houses'),
-                ),
-              ],
+
+                  _buildNavItem(Icons.bar_chart, 'Reports', '/reports'),
+                  _buildNavItem(Icons.account_circle, 'Account', '/profile'),
+                  _buildNavItem(Icons.home_work, 'Houses', '/houses'),
+                ],
+              ),
             ),
           ),
+
           // Logout Button
           Container(
-            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: Color(0xFF1E293B),
+                  width: 1,
+                ), // border-slate-800
+              ),
+            ),
+            padding: const EdgeInsets.all(16), // p-4
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onLogout,
-                icon: const Icon(Icons.logout, size: 18),
-                label: const Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[700],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onLogout,
+                  borderRadius: BorderRadius.circular(6),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.logout,
+                          color: Color(0xFFCBD5E1), // text-slate-300
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: Color(0xFFCBD5E1), // text-slate-300
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -179,43 +154,95 @@ class DashboardSidebar extends StatelessWidget {
       ),
     );
   }
-}
 
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final bool isSelected;
-  final VoidCallback onTap;
+  Widget _buildCubeLogo() {
+    return CustomPaint(size: const Size(40, 40), painter: _CubeLogoPainter());
+  }
 
-  const _NavItem({
-    required this.icon,
-    required this.title,
-    this.isSelected = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue[700] : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+  Widget _buildNavItem(IconData icon, String label, String route) {
+    final isActive = currentRoute == route;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4), // space-y-1
+      decoration: BoxDecoration(
+        color: isActive
+            ? const Color(0xFF1E293B)
+            : Colors.transparent, // bg-slate-800 when active
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => onNavigate(route),
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 8,
+            ), // p-2
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: isActive
+                      ? Colors.white
+                      : const Color(0xFFCBD5E1), // text-white or text-slate-300
+                  size: 24, // h-6 w-6
+                ),
+                const SizedBox(width: 12), // gap-x-3
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isActive ? Colors.white : const Color(0xFFCBD5E1),
+                    fontSize: 14, // text-sm
+                    fontWeight: FontWeight.w600, // font-semibold
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// Custom Painter for the colorful cube logo matching frontend SVG
+class _CubeLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    // Blue top face (#0066FF)
+    paint.color = const Color(0xFF0066FF);
+    final topPath = Path()
+      ..moveTo(20, 5)
+      ..lineTo(32, 12)
+      ..lineTo(20, 19)
+      ..lineTo(8, 12)
+      ..close();
+    canvas.drawPath(topPath, paint);
+
+    // Yellow left face (#FFB800)
+    paint.color = const Color(0xFFFFB800);
+    final leftPath = Path()
+      ..moveTo(8, 12)
+      ..lineTo(8, 26)
+      ..lineTo(20, 33)
+      ..lineTo(20, 19)
+      ..close();
+    canvas.drawPath(leftPath, paint);
+
+    // Red right face (#FF3B30)
+    paint.color = const Color(0xFFFF3B30);
+    final rightPath = Path()
+      ..moveTo(20, 19)
+      ..lineTo(20, 33)
+      ..lineTo(32, 26)
+      ..lineTo(32, 12)
+      ..close();
+    canvas.drawPath(rightPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -1,118 +1,222 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/user.dart';
 
 /// Presentation Widget - Dashboard Header
+/// Modern design with greeting, date, search bar, and profile
 class DashboardHeader extends StatelessWidget {
-  final User? user;
-  final Function(String) onSearch;
-  final bool showDrawerButton;
-  final VoidCallback? onDrawerPressed;
+  final TextEditingController? searchController;
+  final String? username;
+  final String? roleLabel;
+  final bool showMenuButton;
+  final VoidCallback? onMenuPressed;
 
   const DashboardHeader({
     super.key,
-    this.user,
-    required this.onSearch,
-    this.showDrawerButton = false,
-    this.onDrawerPressed,
+    this.searchController,
+    this.username,
+    this.roleLabel,
+    this.showMenuButton = false,
+    this.onMenuPressed,
   });
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning';
+    } else if (hour < 17) {
+      return 'Good Afternoon';
+    } else {
+      return 'Good Evening';
+    }
+  }
+
+  String _getFormattedDate() {
+    final now = DateTime.now();
+    final weekdays = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    final months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return '${weekdays[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 600;
+
     return Container(
-      height: 70,
-      color: Colors.grey[100],
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      child: Row(
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmall ? 16 : 24,
+        vertical: 20,
+      ),
+      color: Colors.green[100],
+      child: Column(
         children: [
-          // Drawer button (mobile only)
-          if (showDrawerButton && onDrawerPressed != null)
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: onDrawerPressed,
-            ),
-          // Search Bar
-          Expanded(
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: 'Search...',
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
+          Row(
+            children: [
+              // Hamburger Menu Button (visible on mobile to open drawer)
+              if (showMenuButton)
+                Builder(
+                  builder: (builderContext) => IconButton(
+                    icon: const Icon(
+                      Icons.menu,
+                      color: Colors.grey,
+                      size: 24,
+                    ),
+                    onPressed:
+                        onMenuPressed ??
+                        () {
+                          Scaffold.of(builderContext).openDrawer();
+                        },
+                    tooltip: 'Open menu',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                 ),
-                onSubmitted: onSearch,
+              if (showMenuButton) const SizedBox(width: 12),
+              // Greeting and Date Section
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hello, ${_getGreeting()}!',
+                      style: TextStyle(
+                        fontSize: isSmall ? 22 : 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _getFormattedDate(),
+                      style: TextStyle(
+                        fontSize: isSmall ? 14 : 16,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              // Profile Picture
+              Container(
+                width: isSmall ? 40 : 48,
+                height: isSmall ? 40 : 48,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.grey[400]!,
+                    width: 2,
+                  ),
+                ),
+                child: ClipOval(
+                  child: username != null && username!.isNotEmpty
+                      ? Container(
+                          color: Colors.green[400],
+                          child: Center(
+                            child: Text(
+                              username!.substring(0, 1).toUpperCase(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: isSmall ? 18 : 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.person,
+                          color: Colors.grey[600],
+                          size: isSmall ? 24 : 28,
+                        ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          // User Info
-          if (user != null) ...[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Admin',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                ),
-                Text(
-                  user!.username,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+          const SizedBox(height: 20),
+          // Search Bar
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.green[200]!,
+                      width: 1,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
-            CircleAvatar(
-              backgroundColor: Colors.blue,
-              child: Text(
-                user!.firstName[0].toUpperCase(),
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-          const SizedBox(width: 16),
-          // Notifications
-          IconButton(
-            icon: Stack(
-              children: [
-                const Icon(Icons.notifications_outlined, size: 28),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
+                  child: TextField(
+                    controller: searchController,
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontSize: 16,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Search here...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 16,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
-            onPressed: () {
-              // Handle notifications
-            },
-          ),
-          const SizedBox(width: 8),
-          // User Menu
-          IconButton(
-            icon: const Icon(Icons.account_circle, size: 28),
-            onPressed: () {
-              // Handle user menu
-            },
+              ),
+              const SizedBox(width: 12),
+              // Search Button
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.grey[800],
+                  shape: BoxShape.circle,
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      // Handle search
+                      if (searchController != null &&
+                          searchController!.text.isNotEmpty) {
+                        // TODO: Implement search functionality
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(25),
+                    child: const Icon(
+                      Icons.search,
+                      color: Colors.green,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

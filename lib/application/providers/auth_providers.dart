@@ -1,8 +1,6 @@
-import 'dart:io' show HttpClient, X509Certificate;
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/config/app_config.dart';
 import '../../data/datasources/auth_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -19,49 +17,23 @@ import '../states/auth_state.dart';
 final authDioProvider = Provider<Dio>((ref) {
   final dio = Dio();
 
-  // Configure Dio for localhost/development
+  // Configure Dio
   dio.options = BaseOptions(
-    connectTimeout: const Duration(seconds: 30),
-    receiveTimeout: const Duration(seconds: 30),
+    connectTimeout: const Duration(seconds: 60), // Increased timeout
+    receiveTimeout: const Duration(seconds: 60), // Increased timeout
     headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
     validateStatus: (status) {
       return status! < 500; // Accept all status codes < 500
     },
   );
 
-  // Handle self-signed certificates (for localhost development)
-  // WARNING: Only for development! Remove in production
-  // Only apply SSL certificate bypass on non-web platforms
-  if (!kIsWeb) {
-    try {
-      // Import IOHttpClientAdapter only on non-web platforms
-      final adapter = dio.httpClientAdapter;
-      if (adapter is DefaultHttpClientAdapter) {
-        adapter.onHttpClientCreate = (HttpClient client) {
-          client.badCertificateCallback =
-              (X509Certificate cert, String host, int port) {
-                // Allow localhost connections with self-signed certificates
-                if (host == 'localhost' || host == '127.0.0.1') {
-                  return true;
-                }
-                return false;
-              };
-          return client;
-        };
-      }
-    } catch (e) {
-      // Ignore if platform doesn't support IOHttpClientAdapter
-    }
-  }
-
   return dio;
 });
 
 // Base URL for authentication API
 final authBaseUrlProvider = Provider<String>((ref) {
-  // User Management API URL (Login API)
-  // Login endpoint: POST https://localhost:7010/api/Authentication/login
-  return 'https://localhost:7010';
+  // User Management API URL (Login API) - loaded from environment
+  return AppConfig.authApiBaseUrl;
 });
 
 // Data sources
