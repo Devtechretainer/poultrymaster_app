@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/flock.dart';
 import '../../domain/entities/flock_request.dart';
 import '../../domain/usecases/create_flock_usecase.dart';
 import '../../domain/usecases/delete_flock_usecase.dart';

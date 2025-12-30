@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/house_providers.dart';
 import '../../domain/entities/house.dart';
+import '../widgets/loading_widget.dart';
 import '../../core/theme/input_theme.dart';
 
 class AddEditHouseScreen extends ConsumerStatefulWidget {
@@ -177,14 +178,7 @@ class _AddEditHouseScreenState extends ConsumerState<AddEditHouseScreen> {
                             style: FormButtonStyle.primary(),
                             child: isLoading
                                 ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
+                                    child: LoadingWidget.small(),
                                   )
                                 : const Text(
                                     'Save Record',

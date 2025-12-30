@@ -5,6 +5,7 @@ import '../../domain/entities/egg_production.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/info_item_widget.dart';
+import '../widgets/loading_widget.dart';
 import 'add_edit_egg_production_screen.dart';
 
 class EggProductionScreen extends ConsumerStatefulWidget {
@@ -18,7 +19,8 @@ class EggProductionScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<EggProductionScreen> createState() => _EggProductionScreenState();
+  ConsumerState<EggProductionScreen> createState() =>
+      _EggProductionScreenState();
 }
 
 class _EggProductionScreenState extends ConsumerState<EggProductionScreen> {
@@ -47,8 +49,9 @@ class _EggProductionScreenState extends ConsumerState<EggProductionScreen> {
   void _navigateToEditEggProduction(EggProduction eggProduction) {
     Navigator.of(context).push(
       MaterialPageRoute(
-          builder: (_) =>
-              AddEditEggProductionScreen(eggProduction: eggProduction)),
+        builder: (_) =>
+            AddEditEggProductionScreen(eggProduction: eggProduction),
+      ),
     );
   }
 
@@ -57,8 +60,9 @@ class _EggProductionScreenState extends ConsumerState<EggProductionScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
-        content:
-            const Text('Are you sure you want to delete this egg production record?'),
+        content: const Text(
+          'Are you sure you want to delete this egg production record?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -73,7 +77,9 @@ class _EggProductionScreenState extends ConsumerState<EggProductionScreen> {
     );
 
     if (confirmed == true) {
-      await ref.read(eggProductionControllerProvider.notifier).deleteEggProduction(id);
+      await ref
+          .read(eggProductionControllerProvider.notifier)
+          .deleteEggProduction(id);
     }
   }
 
@@ -111,12 +117,15 @@ class _EggProductionScreenState extends ConsumerState<EggProductionScreen> {
   }
 
   Widget _buildContent(
-      List<EggProduction> eggProductions, bool isLoading, String? error) {
+    List<EggProduction> eggProductions,
+    bool isLoading,
+    String? error,
+  ) {
     if (isLoading) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
+          child: LoadingWidget.large(),
         ),
       );
     }

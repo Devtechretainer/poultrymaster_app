@@ -4,6 +4,7 @@ import '../../application/providers/house_providers.dart';
 import '../../domain/entities/house.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/loading_widget.dart';
 import 'add_edit_house_screen.dart';
 
 class HousesScreen extends ConsumerStatefulWidget {
@@ -111,7 +112,7 @@ class _HousesScreenState extends ConsumerState<HousesScreen> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
+          child: LoadingWidget.large(),
         ),
       );
     }

@@ -10,6 +10,7 @@ import '../../application/providers/main_flock_batch_providers.dart';
 import '../../domain/entities/main_flock_batch.dart';
 import '../../domain/entities/house.dart';
 import '../widgets/custom_dropdown_button_form_field.dart';
+import '../widgets/loading_widget.dart';
 import '../../core/theme/input_theme.dart';
 
 class FlockAddEditFormScreen extends ConsumerStatefulWidget {
@@ -424,14 +425,7 @@ class _FlockAddEditFormScreenState
                             style: FormButtonStyle.primary(),
                             child: isLoading
                                 ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
+                                    child: LoadingWidget.small(),
                                   )
                                 : const Text(
                                     'Save Record',

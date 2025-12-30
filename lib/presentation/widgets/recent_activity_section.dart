@@ -6,6 +6,7 @@ import '../../application/providers/production_record_providers.dart';
 import '../../domain/entities/sale.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/production_record.dart';
+import 'loading_widget.dart';
 
 /// Recent Activity Item Model
 class RecentActivityItem {
@@ -151,7 +152,7 @@ class RecentActivitySection extends ConsumerWidget {
               const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
-                  child: CircularProgressIndicator(),
+                  child: LoadingWidget.medium(),
                 ),
               )
             else if (activities.isEmpty)

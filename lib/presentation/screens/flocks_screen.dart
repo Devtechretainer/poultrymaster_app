@@ -4,6 +4,7 @@ import '../../application/providers/flock_providers.dart';
 import '../../domain/entities/flock.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/loading_widget.dart';
 import 'flock_add_edit_form_screen.dart';
 
 /// Flocks Screen
@@ -33,9 +34,9 @@ class _FlocksScreenState extends ConsumerState<FlocksScreen> {
   }
 
   void _navigateToAddFlock() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const FlockAddEditFormScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const FlockAddEditFormScreen()));
   }
 
   void _navigateToEditFlock(Flock flock) {
@@ -103,11 +104,9 @@ class _FlocksScreenState extends ConsumerState<FlocksScreen> {
 
   Widget _buildContent(List<Flock> flocks, bool isLoading, String? error) {
     if (isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
-        ),
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: LoadingWidget.large(),
       );
     }
 
@@ -335,18 +334,12 @@ class _InfoItem extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             overflow: TextOverflow.ellipsis,
           ),
         ),

@@ -4,6 +4,7 @@ import '../../application/providers/auth_providers.dart';
 import '../../application/providers/main_flock_batch_providers.dart';
 import '../../domain/entities/main_flock_batch.dart';
 import '../../domain/entities/flock_batch_request.dart';
+import '../widgets/loading_widget.dart';
 import '../../core/theme/input_theme.dart';
 
 class AddEditMainFlockBatchScreen extends ConsumerStatefulWidget {
@@ -250,14 +251,7 @@ class _AddEditMainFlockBatchScreenState
                             style: FormButtonStyle.primary(),
                             child: isLoading
                                 ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
+                                    child: LoadingWidget.small(),
                                   )
                                 : const Text(
                                     'Save Record',

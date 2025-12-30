@@ -9,6 +9,7 @@ import '../widgets/summary_card_widget.dart';
 import '../widgets/recent_activity_section.dart';
 import '../widgets/quick_actions_section.dart';
 import '../widgets/app_navigator.dart';
+import '../widgets/loading_widget.dart';
 import 'login_screen.dart';
 
 /// Presentation Screen - Dashboard/Overview
@@ -197,11 +198,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     children: [
                       // Summary Cards Grid
                       if (dashboardState.isLoading)
-                        const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(32.0),
-                            child: CircularProgressIndicator(),
-                          ),
+                        const Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: LoadingWidget.large(),
                         )
                       else if (dashboardState.error != null)
                         Center(
@@ -300,9 +299,7 @@ class _SummaryCardsGrid extends StatelessWidget {
               key: ValueKey('summary_card_$index'),
               card: card,
               isMobile: isMobileScreen,
-              onTap: card.route != null
-                  ? () => onNavigate(card.route!)
-                  : null,
+              onTap: card.route != null ? () => onNavigate(card.route!) : null,
             );
           },
         );
@@ -316,10 +313,7 @@ class _BottomSection extends StatelessWidget {
   final bool isMobile;
   final Function(String) onNavigate;
 
-  const _BottomSection({
-    required this.isMobile,
-    required this.onNavigate,
-  });
+  const _BottomSection({required this.isMobile, required this.onNavigate});
 
   @override
   Widget build(BuildContext context) {
@@ -340,7 +334,10 @@ class _BottomSection extends StatelessWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(flex: 2, child: RecentActivitySection(onNavigate: onNavigate)),
+            Expanded(
+              flex: 2,
+              child: RecentActivitySection(onNavigate: onNavigate),
+            ),
             const SizedBox(width: 16),
             const Expanded(flex: 1, child: QuickActionsSection()),
           ],

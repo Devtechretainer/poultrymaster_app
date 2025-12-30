@@ -4,6 +4,7 @@ import '../../application/providers/sale_providers.dart';
 import '../../domain/entities/sale.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/loading_widget.dart';
 import 'add_edit_sale_screen.dart';
 
 class SalesScreen extends ConsumerStatefulWidget {
@@ -38,15 +39,15 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   }
 
   void _navigateToAddSale() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AddEditSaleScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const AddEditSaleScreen()));
   }
 
   void _navigateToEditSale(Sale sale) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => AddEditSaleScreen(sale: sale)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => AddEditSaleScreen(sale: sale)));
   }
 
   Future<void> _deleteSale(int id) async {
@@ -54,7 +55,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this sale record?'),
+        content: const Text(
+          'Are you sure you want to delete this sale record?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -108,11 +111,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
 
   Widget _buildContent(List<Sale> sales, bool isLoading, String? error) {
     if (isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
-        ),
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: LoadingWidget.large(),
       );
     }
 
@@ -335,18 +336,12 @@ class _InfoItem extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             overflow: TextOverflow.ellipsis,
           ),
         ),

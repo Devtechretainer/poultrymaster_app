@@ -5,6 +5,7 @@ import '../../domain/entities/production_record.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/info_item_widget.dart';
+import '../widgets/loading_widget.dart';
 import 'add_edit_production_record_screen.dart';
 
 class ProductionRecordsScreen extends ConsumerStatefulWidget {
@@ -30,7 +31,9 @@ class _ProductionRecordsScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(productionRecordControllerProvider.notifier).loadProductionRecords();
+      ref
+          .read(productionRecordControllerProvider.notifier)
+          .loadProductionRecords();
     });
   }
 
@@ -49,8 +52,9 @@ class _ProductionRecordsScreenState
   void _navigateToEditProductionRecord(ProductionRecord productionRecord) {
     Navigator.of(context).push(
       MaterialPageRoute(
-          builder: (_) =>
-              AddEditProductionRecordScreen(productionRecord: productionRecord)),
+        builder: (_) =>
+            AddEditProductionRecordScreen(productionRecord: productionRecord),
+      ),
     );
   }
 
@@ -59,8 +63,9 @@ class _ProductionRecordsScreenState
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
-        content:
-            const Text('Are you sure you want to delete this production record?'),
+        content: const Text(
+          'Are you sure you want to delete this production record?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -75,7 +80,9 @@ class _ProductionRecordsScreenState
     );
 
     if (confirmed == true) {
-      await ref.read(productionRecordControllerProvider.notifier).deleteProductionRecord(id);
+      await ref
+          .read(productionRecordControllerProvider.notifier)
+          .deleteProductionRecord(id);
     }
   }
 
@@ -113,13 +120,14 @@ class _ProductionRecordsScreenState
   }
 
   Widget _buildContent(
-      List<ProductionRecord> productionRecords, bool isLoading, String? error) {
+    List<ProductionRecord> productionRecords,
+    bool isLoading,
+    String? error,
+  ) {
     if (isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
-        ),
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: LoadingWidget.large(),
       );
     }
 

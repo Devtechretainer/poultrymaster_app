@@ -2,7 +2,6 @@ import '../../domain/entities/main_flock_batch.dart';
 import '../../domain/entities/flock_batch_request.dart';
 import '../../domain/repositories/main_flock_batch_repository.dart';
 import '../datasources/main_flock_batch_datasource.dart';
-import '../models/main_flock_batch_model.dart';
 
 class MainFlockBatchRepositoryImpl implements MainFlockBatchRepository {
   final MainFlockBatchDataSource dataSource;
@@ -12,7 +11,9 @@ class MainFlockBatchRepositoryImpl implements MainFlockBatchRepository {
 
   @override
   Future<List<MainFlockBatch>> getAllMainFlockBatches(
-      String userId, String farmId) async {
+    String userId,
+    String farmId,
+  ) async {
     try {
       final batches = await dataSource.getAllMainFlockBatches(
         userId,
@@ -46,10 +47,13 @@ class MainFlockBatchRepositoryImpl implements MainFlockBatchRepository {
 
   @override
   Future<MainFlockBatch> createMainFlockBatch(
-      FlockBatchRequest flockBatchRequest) async {
+    FlockBatchRequest flockBatchRequest,
+  ) async {
     try {
-      final created =
-          await dataSource.createMainFlockBatch(flockBatchRequest, authToken);
+      final created = await dataSource.createMainFlockBatch(
+        flockBatchRequest,
+        authToken,
+      );
       return created.toEntity();
     } catch (e) {
       throw Exception('Failed to create main flock batch: $e');
@@ -58,10 +62,15 @@ class MainFlockBatchRepositoryImpl implements MainFlockBatchRepository {
 
   @override
   Future<void> updateMainFlockBatch(
-      int batchId, FlockBatchRequest flockBatchRequest) async {
+    int batchId,
+    FlockBatchRequest flockBatchRequest,
+  ) async {
     try {
       await dataSource.updateMainFlockBatch(
-          batchId, flockBatchRequest, authToken);
+        batchId,
+        flockBatchRequest,
+        authToken,
+      );
     } catch (e) {
       throw Exception('Failed to update main flock batch: $e');
     }

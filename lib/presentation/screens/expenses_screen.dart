@@ -4,6 +4,7 @@ import '../../application/providers/expense_providers.dart';
 import '../../domain/entities/expense.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/loading_widget.dart';
 import 'add_edit_expense_screen.dart';
 
 class ExpensesScreen extends ConsumerStatefulWidget {
@@ -38,9 +39,9 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
   }
 
   void _navigateToAddExpense() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AddEditExpenseScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const AddEditExpenseScreen()));
   }
 
   void _navigateToEditExpense(Expense expense) {
@@ -54,7 +55,9 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this expense record?'),
+        content: const Text(
+          'Are you sure you want to delete this expense record?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -106,14 +109,11 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
     );
   }
 
-  Widget _buildContent(
-      List<Expense> expenses, bool isLoading, String? error) {
+  Widget _buildContent(List<Expense> expenses, bool isLoading, String? error) {
     if (isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
-        ),
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: LoadingWidget.large(),
       );
     }
 
@@ -279,7 +279,8 @@ class _ExpenseCard extends StatelessWidget {
               label: 'Payment',
               value: expense.paymentMethod,
             ),
-            if (expense.description != null && expense.description!.isNotEmpty) ...[
+            if (expense.description != null &&
+                expense.description!.isNotEmpty) ...[
               const SizedBox(height: 12),
               _InfoItem(
                 icon: Icons.description_outlined,
@@ -332,18 +333,12 @@ class _InfoItem extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             overflow: TextOverflow.ellipsis,
           ),
         ),

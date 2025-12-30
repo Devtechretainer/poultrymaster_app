@@ -5,6 +5,7 @@ import '../../domain/entities/main_flock_batch.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/info_item_widget.dart';
+import '../widgets/loading_widget.dart';
 import 'add_edit_main_flock_batch_screen.dart';
 
 class FlockBatchScreen extends ConsumerStatefulWidget {
@@ -28,7 +29,9 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(mainFlockBatchControllerProvider.notifier).loadMainFlockBatches();
+      ref
+          .read(mainFlockBatchControllerProvider.notifier)
+          .loadMainFlockBatches();
     });
   }
 
@@ -47,8 +50,9 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
   void _navigateToEditMainFlockBatch(MainFlockBatch mainFlockBatch) {
     Navigator.of(context).push(
       MaterialPageRoute(
-          builder: (_) =>
-              AddEditMainFlockBatchScreen(mainFlockBatch: mainFlockBatch)),
+        builder: (_) =>
+            AddEditMainFlockBatchScreen(mainFlockBatch: mainFlockBatch),
+      ),
     );
   }
 
@@ -57,7 +61,9 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this flock batch?'),
+        content: const Text(
+          'Are you sure you want to delete this flock batch?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -72,7 +78,9 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
     );
 
     if (confirmed == true) {
-      await ref.read(mainFlockBatchControllerProvider.notifier).deleteMainFlockBatch(batchId);
+      await ref
+          .read(mainFlockBatchControllerProvider.notifier)
+          .deleteMainFlockBatch(batchId);
     }
   }
 
@@ -109,12 +117,16 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
     );
   }
 
-  Widget _buildContent(List<MainFlockBatch> mainFlockBatches, bool isLoading, String? error) {
+  Widget _buildContent(
+    List<MainFlockBatch> mainFlockBatches,
+    bool isLoading,
+    String? error,
+  ) {
     if (isLoading) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
+          child: LoadingWidget.large(),
         ),
       );
     }
@@ -134,7 +146,9 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  ref.read(mainFlockBatchControllerProvider.notifier).loadMainFlockBatches();
+                  ref
+                      .read(mainFlockBatchControllerProvider.notifier)
+                      .loadMainFlockBatches();
                 },
                 child: const Text('Retry'),
               ),

@@ -16,8 +16,11 @@ import '../states/user_profile_state.dart';
 final userProfileDioProvider = Provider<Dio>((ref) {
   final dio = Dio();
   dio.options = BaseOptions(
-    connectTimeout: const Duration(seconds: 60),
-    receiveTimeout: const Duration(seconds: 60),
+    connectTimeout: const Duration(seconds: 120), // 2 minutes for connection
+    receiveTimeout: const Duration(
+      seconds: 120,
+    ), // 2 minutes for receiving data
+    sendTimeout: const Duration(seconds: 120), // 2 minutes for sending data
     headers: {'Content-Type': 'application/json'},
   );
   return dio;
@@ -42,17 +45,23 @@ final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
 });
 
 // Use cases
-final createUserProfileUseCaseProvider = Provider<CreateUserProfileUseCase>((ref) {
+final createUserProfileUseCaseProvider = Provider<CreateUserProfileUseCase>((
+  ref,
+) {
   final repository = ref.watch(userProfileRepositoryProvider);
   return CreateUserProfileUseCase(repository);
 });
 
-final updateUserProfileUseCaseProvider = Provider<UpdateUserProfileUseCase>((ref) {
+final updateUserProfileUseCaseProvider = Provider<UpdateUserProfileUseCase>((
+  ref,
+) {
   final repository = ref.watch(userProfileRepositoryProvider);
   return UpdateUserProfileUseCase(repository);
 });
 
-final deleteUserProfileUseCaseProvider = Provider<DeleteUserProfileUseCase>((ref) {
+final deleteUserProfileUseCaseProvider = Provider<DeleteUserProfileUseCase>((
+  ref,
+) {
   final repository = ref.watch(userProfileRepositoryProvider);
   return DeleteUserProfileUseCase(repository);
 });
@@ -62,24 +71,34 @@ final findUserProfileUseCaseProvider = Provider<FindUserProfileUseCase>((ref) {
   return FindUserProfileUseCase(repository);
 });
 
-final findUserProfileByUsernameUseCaseProvider = Provider<FindUserProfileByUsernameUseCase>((ref) {
-  final repository = ref.watch(userProfileRepositoryProvider);
-  return FindUserProfileByUsernameUseCase(repository);
-});
+final findUserProfileByUsernameUseCaseProvider =
+    Provider<FindUserProfileByUsernameUseCase>((ref) {
+      final repository = ref.watch(userProfileRepositoryProvider);
+      return FindUserProfileByUsernameUseCase(repository);
+    });
 
 // Controller
-final userProfileControllerProvider = StateNotifierProvider<UserProfileController, UserProfileState>((ref) {
-  final createUserProfileUseCase = ref.watch(createUserProfileUseCaseProvider);
-  final updateUserProfileUseCase = ref.watch(updateUserProfileUseCaseProvider);
-  final deleteUserProfileUseCase = ref.watch(deleteUserProfileUseCaseProvider);
-  final findUserProfileUseCase = ref.watch(findUserProfileUseCaseProvider);
-  final findUserProfileByUsernameUseCase = ref.watch(findUserProfileByUsernameUseCaseProvider);
+final userProfileControllerProvider =
+    StateNotifierProvider<UserProfileController, UserProfileState>((ref) {
+      final createUserProfileUseCase = ref.watch(
+        createUserProfileUseCaseProvider,
+      );
+      final updateUserProfileUseCase = ref.watch(
+        updateUserProfileUseCaseProvider,
+      );
+      final deleteUserProfileUseCase = ref.watch(
+        deleteUserProfileUseCaseProvider,
+      );
+      final findUserProfileUseCase = ref.watch(findUserProfileUseCaseProvider);
+      final findUserProfileByUsernameUseCase = ref.watch(
+        findUserProfileByUsernameUseCaseProvider,
+      );
 
-  return UserProfileController(
-    createUserProfileUseCase: createUserProfileUseCase,
-    updateUserProfileUseCase: updateUserProfileUseCase,
-    deleteUserProfileUseCase: deleteUserProfileUseCase,
-    findUserProfileUseCase: findUserProfileUseCase,
-    findUserProfileByUsernameUseCase: findUserProfileByUsernameUseCase,
-  );
-});
+      return UserProfileController(
+        createUserProfileUseCase: createUserProfileUseCase,
+        updateUserProfileUseCase: updateUserProfileUseCase,
+        deleteUserProfileUseCase: deleteUserProfileUseCase,
+        findUserProfileUseCase: findUserProfileUseCase,
+        findUserProfileByUsernameUseCase: findUserProfileByUsernameUseCase,
+      );
+    });

@@ -2,7 +2,6 @@ import '../../domain/entities/flock.dart';
 import '../../domain/entities/flock_request.dart';
 import '../../domain/repositories/flock_repository.dart';
 import '../datasources/flock_datasource.dart';
-import '../models/flock_model.dart';
 
 class FlockRepositoryImpl implements FlockRepository {
   final FlockDataSource dataSource;
@@ -13,11 +12,7 @@ class FlockRepositoryImpl implements FlockRepository {
   @override
   Future<List<Flock>> getAllFlocks(String userId, String farmId) async {
     try {
-      final flocks = await dataSource.getAllFlocks(
-        userId,
-        farmId,
-        authToken,
-      );
+      final flocks = await dataSource.getAllFlocks(userId, farmId, authToken);
       return flocks.map((model) => model.toEntity()).toList();
     } catch (e) {
       throw Exception('Failed to get flocks: $e');
@@ -25,11 +20,7 @@ class FlockRepositoryImpl implements FlockRepository {
   }
 
   @override
-  Future<Flock?> getFlockById(
-    int flockId,
-    String userId,
-    String farmId,
-  ) async {
+  Future<Flock?> getFlockById(int flockId, String userId, String farmId) async {
     try {
       final flock = await dataSource.getFlockById(
         flockId,
@@ -63,11 +54,7 @@ class FlockRepositoryImpl implements FlockRepository {
   }
 
   @override
-  Future<void> deleteFlock(
-    int flockId,
-    String userId,
-    String farmId,
-  ) async {
+  Future<void> deleteFlock(int flockId, String userId, String farmId) async {
     try {
       await dataSource.deleteFlock(flockId, userId, farmId, authToken);
     } catch (e) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'loading_widget.dart';
 
 class CustomDropdownButtonFormField<T> extends StatelessWidget {
   final T? value;
@@ -34,7 +35,7 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
               child: SizedBox(
                 height: 20,
                 width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: LoadingWidget.small(),
               ),
             ),
           ),
@@ -54,7 +55,7 @@ class CustomDropdownButtonFormField<T> extends StatelessWidget {
     }
 
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       decoration: decoration,
       items: items,
       onChanged: onChanged,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/user_profile_providers.dart';
 import '../../domain/entities/user_profile.dart';
 import '../widgets/base_page_screen.dart';
+import '../widgets/loading_widget.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../core/theme/input_theme.dart';
 
@@ -51,7 +52,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       iconBackgroundColor: const Color(0xFFF5F3FF),
       searchController: searchController,
       child: userProfileState.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const LoadingWidget.large()
           : userProfileState.error != null
               ? Center(child: Text('Error: ${userProfileState.error}'))
               : Container(

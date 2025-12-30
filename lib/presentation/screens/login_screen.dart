@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/states/auth_state.dart';
 import '../widgets/branding_section.dart';
+import '../widgets/loading_widget.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import 'home_screen.dart';
@@ -357,7 +358,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               _rememberMe = value ?? false;
                             });
                           },
-                          fillColor: MaterialStateProperty.all(Colors.orange),
+                          fillColor: WidgetStateProperty.all(Colors.orange),
                         ),
                         const Flexible(
                           child: Text(
@@ -403,7 +404,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             _rememberMe = value ?? false;
                           });
                         },
-                        fillColor: MaterialStateProperty.all(Colors.orange),
+                        fillColor: WidgetStateProperty.all(Colors.orange),
                       ),
                       Text(
                         'Remember me',
@@ -448,14 +449,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
               child: authState.isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
+                  ? const SizedBox(child: LoadingWidget.small())
                   : const Text(
                       'Sign In',
                       style: TextStyle(

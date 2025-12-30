@@ -7,6 +7,7 @@ import '../../domain/entities/expense.dart';
 import '../../application/providers/flock_providers.dart';
 import '../../domain/entities/flock.dart';
 import '../widgets/custom_dropdown_button_form_field.dart';
+import '../widgets/loading_widget.dart';
 import '../../core/utils/toast_utils.dart';
 import '../../core/theme/input_theme.dart';
 
@@ -360,14 +361,7 @@ class _AddEditExpenseScreenState extends ConsumerState<AddEditExpenseScreen> {
                             style: FormButtonStyle.primary(),
                             child: isLoading
                                 ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
+                                    child: LoadingWidget.small(),
                                   )
                                 : const Text(
                                     'Save Record',

@@ -5,6 +5,7 @@ import '../../domain/entities/feed_usage.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/info_item_widget.dart';
+import '../widgets/loading_widget.dart';
 import 'add_edit_feed_usage_screen.dart';
 
 class FeedUsageScreen extends ConsumerStatefulWidget {
@@ -39,15 +40,16 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
   }
 
   void _navigateToAddFeedUsage() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AddEditFeedUsageScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const AddEditFeedUsageScreen()));
   }
 
   void _navigateToEditFeedUsage(FeedUsage feedUsage) {
     Navigator.of(context).push(
       MaterialPageRoute(
-          builder: (_) => AddEditFeedUsageScreen(feedUsage: feedUsage)),
+        builder: (_) => AddEditFeedUsageScreen(feedUsage: feedUsage),
+      ),
     );
   }
 
@@ -56,7 +58,9 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
-        content: const Text('Are you sure you want to delete this feed usage record?'),
+        content: const Text(
+          'Are you sure you want to delete this feed usage record?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -109,12 +113,15 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
   }
 
   Widget _buildContent(
-      List<FeedUsage> feedUsages, bool isLoading, String? error) {
+    List<FeedUsage> feedUsages,
+    bool isLoading,
+    String? error,
+  ) {
     if (isLoading) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
+          child: LoadingWidget.large(),
         ),
       );
     }

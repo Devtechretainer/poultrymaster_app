@@ -15,8 +15,11 @@ import '../states/dashboard_state.dart';
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio();
   dio.options = BaseOptions(
-    connectTimeout: const Duration(seconds: 60), // Increased timeout
-    receiveTimeout: const Duration(seconds: 60), // Increased timeout
+    connectTimeout: const Duration(seconds: 120), // 2 minutes for connection
+    receiveTimeout: const Duration(
+      seconds: 120,
+    ), // 2 minutes for receiving data
+    sendTimeout: const Duration(seconds: 120), // 2 minutes for sending data
     headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
     validateStatus: (status) {
       return status! < 500; // Accept all status codes < 500

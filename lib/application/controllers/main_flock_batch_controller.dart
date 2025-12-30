@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/flock_batch_request.dart';
-import '../../domain/entities/main_flock_batch.dart';
 import '../../domain/usecases/create_main_flock_batch_usecase.dart';
 import '../../domain/usecases/delete_main_flock_batch_usecase.dart';
 import '../../domain/usecases/get_main_flock_batches_usecase.dart';
@@ -33,10 +32,11 @@ class MainFlockBatchController extends StateNotifier<MainFlockBatchState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final mainFlockBatches =
-          await getMainFlockBatchesUseCase(userId, farmId);
+      final mainFlockBatches = await getMainFlockBatchesUseCase(userId, farmId);
       state = state.copyWith(
-          mainFlockBatches: mainFlockBatches, isLoading: false);
+        mainFlockBatches: mainFlockBatches,
+        isLoading: false,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -62,7 +62,10 @@ class MainFlockBatchController extends StateNotifier<MainFlockBatchState> {
     }
   }
 
-  Future<bool> updateMainFlockBatch(int batchId, FlockBatchRequest flockBatchRequest) async {
+  Future<bool> updateMainFlockBatch(
+    int batchId,
+    FlockBatchRequest flockBatchRequest,
+  ) async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {

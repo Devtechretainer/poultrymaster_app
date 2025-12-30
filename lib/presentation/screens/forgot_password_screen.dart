@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/states/auth_state.dart';
 import '../widgets/branding_section.dart';
+import '../widgets/loading_widget.dart';
 
 /// Presentation Screen - Forgot Password UI
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -179,10 +180,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               ),
                               keyboardType: TextInputType.emailAddress,
                               validator: (value) {
-                                if (value == null || value.isEmpty)
+                                if (value == null || value.isEmpty) {
                                   return 'Required';
-                                if (!value.contains('@'))
+                                }
+                                if (!value.contains('@')) {
                                   return 'Invalid email';
+                                }
                                 return null;
                               },
                             ),
@@ -234,10 +237,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                       ),
                                     ),
                                 validator: (value) {
-                                  if (value == null || value.isEmpty)
+                                  if (value == null || value.isEmpty) {
                                     return 'Required';
-                                  if (value.length < 6)
+                                  }
+                                  if (value.length < 6) {
                                     return 'Must be at least 6 characters';
+                                  }
                                   return null;
                                 },
                               ),
@@ -259,15 +264,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 ),
                                 child: authState.isLoading
                                     ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
-                                              ),
-                                        ),
+                                        child: LoadingWidget.small(),
                                       )
                                     : Text(
                                         _showOtpField
@@ -388,8 +385,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           ),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return 'Required';
+                            }
                             if (!value.contains('@')) return 'Invalid email';
                             return null;
                           },
@@ -438,10 +436,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                   ),
                                 ),
                             validator: (value) {
-                              if (value == null || value.isEmpty)
+                              if (value == null || value.isEmpty) {
                                 return 'Required';
-                              if (value.length < 6)
+                              }
+                              if (value.length < 6) {
                                 return 'Must be at least 6 characters';
+                              }
                               return null;
                             },
                           ),
@@ -463,16 +463,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               ),
                             ),
                             child: authState.isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
+                                ? const LoadingWidget.small()
                                 : Text(
                                     _showOtpField
                                         ? 'Reset Password'

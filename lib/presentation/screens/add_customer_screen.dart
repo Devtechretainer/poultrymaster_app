@@ -4,6 +4,7 @@ import '../../application/providers/auth_providers.dart';
 import '../../application/providers/customer_providers.dart';
 import '../../domain/entities/customer.dart';
 import '../../core/theme/input_theme.dart';
+import '../widgets/loading_widget.dart';
 
 /// Add or Edit Customer Screen
 class AddCustomerScreen extends ConsumerStatefulWidget {
@@ -233,16 +234,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                           onPressed: isLoading ? null : _submitForm,
                           style: FormButtonStyle.primary(),
                           child: isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
+                              ? const LoadingWidget.small()
                               : Text(
                                   _isEditMode
                                       ? 'Update Customer'

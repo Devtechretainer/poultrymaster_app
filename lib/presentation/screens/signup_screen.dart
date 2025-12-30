@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/states/auth_state.dart';
 import '../widgets/branding_section.dart';
+import '../widgets/loading_widget.dart';
 import 'home_screen.dart';
 
 /// Presentation Screen - Sign Up UI
@@ -242,8 +243,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                 if (value == null || value.isEmpty) {
                                   return 'Required';
                                 }
-                                if (!value.contains('@'))
+                                if (!value.contains('@')) {
                                   return 'Invalid email';
+                                }
                                 return null;
                               },
                             ),
@@ -315,15 +317,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                 ),
                                 child: authState.isLoading
                                     ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
-                                              ),
-                                        ),
+                                        child: LoadingWidget.small(),
                                       )
                                     : const Text(
                                         'Create Account',
@@ -484,8 +478,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             ),
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
-                              if (value == null || value.isEmpty)
+                              if (value == null || value.isEmpty) {
                                 return 'Required';
+                              }
                               if (!value.contains('@')) return 'Invalid email';
                               return null;
                             },
@@ -524,10 +519,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   ),
                                 ),
                             validator: (value) {
-                              if (value == null || value.isEmpty)
+                              if (value == null || value.isEmpty) {
                                 return 'Required';
-                              if (value.length < 6)
+                              }
+                              if (value.length < 6) {
                                 return 'Must be at least 6 characters';
+                              }
                               return null;
                             },
                           ),
@@ -546,17 +543,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                 ),
                               ),
                               child: authState.isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
-                                      ),
-                                    )
+                                  ? const SizedBox(child: LoadingWidget.small())
                                   : const Text(
                                       'Create Account',
                                       style: TextStyle(

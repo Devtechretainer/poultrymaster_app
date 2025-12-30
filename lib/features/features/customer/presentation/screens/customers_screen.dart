@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../domain/entities/customer.dart';
 import '../../../../../presentation/widgets/base_page_screen.dart';
 import '../../../../../presentation/widgets/empty_state_widget.dart';
+import '../../../../../presentation/widgets/loading_widget.dart';
 import '../../../../../application/providers/customer_providers.dart';
 import '../../../../../presentation/screens/add_customer_screen.dart';
 
@@ -114,7 +115,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
+          child: LoadingWidget.large(),
         ),
       );
     }
