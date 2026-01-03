@@ -31,17 +31,39 @@ class UserProfileDataSource {
     if (kDebugMode) {
       print('Updating user profile with baseUrl: $baseUrl');
     }
+    
     try {
       final response = await dio.put(
         '$baseUrl/api/UserProfile/update',
         data: userProfile.toJson(),
       );
       if (response.statusCode == 200) {
-        return UserProfile.fromJson(response.data);
+        if (kDebugMode) {
+          print('UserProfile update successful. Response data: ${response.data}');
+        }
+        // The backend returns an IdentityResult, not the user profile.
+        // On success, we assume the update worked and return the original object
+        // that was passed in, which contains the user's edits from the UI.
+        return userProfile;
       } else {
-        throw Exception('Failed to update user profile');
+        if (kDebugMode) {
+          print('Failed to update user profile. Status code: ${response.statusCode}, Response data: ${response.data}');
+        }
+        throw Exception('Failed to update user profile: Status code ${response.statusCode}');
       }
+    } on DioException catch (e) {
+      if (kDebugMode) {
+        print('DioException during user profile update: ${e.message}');
+        if (e.response != null) {
+          print('DioException response status: ${e.response?.statusCode}');
+          print('DioException response data: ${e.response?.data}');
+        }
+      }
+      throw Exception('Failed to update user profile: ${e.message}');
     } catch (e) {
+      if (kDebugMode) {
+        print('Generic exception during user profile update: $e');
+      }
       throw Exception('Failed to update user profile: $e');
     }
   }
