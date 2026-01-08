@@ -11,6 +11,9 @@ class AuthRepositoryImpl implements AuthRepository {
   static const String _currentUserKey = 'current_user';
   static const String _isLoggedInKey = 'is_logged_in';
 
+  // Public static getter for _currentUserKey
+  static String get currentUserKey => _currentUserKey;
+
   AuthRepositoryImpl(this.dataSource);
 
   @override

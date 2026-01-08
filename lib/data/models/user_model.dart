@@ -9,7 +9,7 @@ class UserModel {
   final String lastName;
   final String username;
   final String email;
-  final String phoneNumber;
+  final String? phoneNumber;
   final String? token;
 
   UserModel({
@@ -64,7 +64,7 @@ class UserModel {
       'lastName': lastName,
       'username': username,
       'email': email,
-      'phoneNumber': phoneNumber,
+      if (phoneNumber != null) 'phoneNumber': phoneNumber,
       if (token != null) 'token': token,
     };
   }
@@ -80,7 +80,7 @@ class UserModel {
     final lastName = json['lastName'] as String? ?? '';
     final username = json['username'] as String? ?? '';
     final email = json['email'] as String? ?? '';
-    final phoneNumber = json['phoneNumber'] as String? ?? '';
+    final phoneNumber = json['phoneNumber'] as String?;
 
     // Token might be nested in accessToken.token
     String? token;

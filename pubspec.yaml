@@ -1,4 +1,4 @@
-name: student_safety_platform
+name: poultrymaster_app
 description: "Student Safety Platform - Secure pickup verification system with offline-first architecture"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -36,6 +36,7 @@ dependencies:
   
   # Local Storage
   shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
   
   # Network
   dio: ^5.4.0
@@ -50,6 +51,7 @@ dependencies:
   
   # Lottie Animations
   lottie: ^3.1.2
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

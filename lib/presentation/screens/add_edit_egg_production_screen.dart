@@ -48,17 +48,43 @@ class _AddEditEggProductionScreenState
       _selectedProductionDate = record.productionDate;
     }
 
+    // Add listeners to update the egg count automatically
+    _production9AMController.addListener(_calculateEggCount);
+    _production12PMController.addListener(_calculateEggCount);
+    _production4PMController.addListener(_calculateEggCount);
+    _brokenEggsController.addListener(_calculateEggCount);
+
+    // Initial calculation for edit mode
+    if (_isEditMode) {
+      _calculateEggCount();
+    }
   }
 
   @override
   void dispose() {
     _eggCountController.dispose();
+    _production9AMController.removeListener(_calculateEggCount);
+    _production12PMController.removeListener(_calculateEggCount);
+    _production4PMController.removeListener(_calculateEggCount);
+    _brokenEggsController.removeListener(_calculateEggCount);
     _production9AMController.dispose();
     _production12PMController.dispose();
     _production4PMController.dispose();
     _brokenEggsController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  void _calculateEggCount() {
+    final production9AM = int.tryParse(_production9AMController.text) ?? 0;
+    final production12PM = int.tryParse(_production12PMController.text) ?? 0;
+    final production4PM = int.tryParse(_production4PMController.text) ?? 0;
+    final brokenEggs = int.tryParse(_brokenEggsController.text) ?? 0;
+    final total = production9AM + production12PM + production4PM + brokenEggs;
+
+    if (_eggCountController.text != total.toString()) {
+      _eggCountController.text = total.toString();
+    }
   }
 
   Future<void> _selectProductionDate(BuildContext context) async {
@@ -264,20 +290,12 @@ class _AddEditEggProductionScreenState
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _eggCountController,
+                          readOnly: true,
                           decoration: InputTheme.standardDecoration(
                             label: 'Egg Count *',
-                            hint: 'Enter number',
+                            hint: 'Calculated automatically',
                           ),
                           keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Egg Count is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 16),
                         TextFormField(

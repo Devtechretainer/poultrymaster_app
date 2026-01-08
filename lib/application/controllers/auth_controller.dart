@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/forgot_password_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
+import '../../domain/entities/user.dart';
 import '../states/auth_state.dart';
 
 /// Controller - Manages authentication state and coordinates use cases
@@ -47,6 +49,9 @@ class AuthController extends StateNotifier<AuthState> {
 
     try {
       final user = await loginUseCase(usernameOrEmail, password, rememberMe);
+      if (kDebugMode) {
+        debugPrint('Logged in user phone number: ${user.phoneNumber}');
+      }
       state = state.copyWith(
         user: user,
         isLoading: false,
@@ -144,6 +149,11 @@ class AuthController extends StateNotifier<AuthState> {
         error: e.toString().replaceAll('Exception: ', ''),
       );
     }
+  }
+
+  /// Update user data in the state
+  void updateUser(User user) {
+    state = state.copyWith(user: user);
   }
 
   /// Clear error

@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\src\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\Users\CODEWITHFIIFI\Downloads\Telegram Desktop\poultrycore_mbo\poultrycore_mbo"
+export "FLUTTER_ROOT=C:\flutter_windows\flutter"
+export "FLUTTER_APPLICATION_PATH=C:\my_project\work\TechRetainerLLC\FarmArchive\poultrymaster_app"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

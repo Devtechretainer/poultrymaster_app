@@ -26,6 +26,7 @@ class UserProfile extends Equatable {
   final String? lastName;
   final String? customerId;
   final DateTime? lastLoginTime;
+  final String? selectedFarmId;
 
   const UserProfile({
     this.id,
@@ -53,6 +54,7 @@ class UserProfile extends Equatable {
     this.lastName,
     this.customerId,
     this.lastLoginTime,
+    this.selectedFarmId,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -82,6 +84,7 @@ class UserProfile extends Equatable {
       lastName: json['lastName'],
       customerId: json['customerId'],
       lastLoginTime: json['lastLoginTime'] != null ? DateTime.parse(json['lastLoginTime']) : null,
+      selectedFarmId: json['selectedFarmId'],
     );
   }
 
@@ -112,7 +115,66 @@ class UserProfile extends Equatable {
       'lastName': lastName,
       'customerId': customerId,
       'lastLoginTime': lastLoginTime?.toIso8601String(),
+      'selectedFarmId': selectedFarmId,
     };
+  }
+
+  UserProfile copyWith({
+    String? id,
+    String? userName,
+    String? normalizedUserName,
+    String? email,
+    String? normalizedEmail,
+    bool? emailConfirmed,
+    String? passwordHash,
+    String? securityStamp,
+    String? concurrencyStamp,
+    String? phoneNumber,
+    bool? phoneNumberConfirmed,
+    bool? twoFactorEnabled,
+    DateTime? lockoutEnd,
+    bool? lockoutEnabled,
+    int? accessFailedCount,
+    String? farmId,
+    String? farmName,
+    bool? isStaff,
+    bool? isSubscriber,
+    String? refreshToken,
+    DateTime? refreshTokenExpiry,
+    String? firstName,
+    String? lastName,
+    String? customerId,
+    DateTime? lastLoginTime,
+    String? selectedFarmId,
+  }) {
+    return UserProfile(
+      id: id ?? this.id,
+      userName: userName ?? this.userName,
+      normalizedUserName: normalizedUserName ?? this.normalizedUserName,
+      email: email ?? this.email,
+      normalizedEmail: normalizedEmail ?? this.normalizedEmail,
+      emailConfirmed: emailConfirmed ?? this.emailConfirmed,
+      passwordHash: passwordHash ?? this.passwordHash,
+      securityStamp: securityStamp ?? this.securityStamp,
+      concurrencyStamp: concurrencyStamp ?? this.concurrencyStamp,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      phoneNumberConfirmed: phoneNumberConfirmed ?? this.phoneNumberConfirmed,
+      twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
+      lockoutEnd: lockoutEnd ?? this.lockoutEnd,
+      lockoutEnabled: lockoutEnabled ?? this.lockoutEnabled,
+      accessFailedCount: accessFailedCount ?? this.accessFailedCount,
+      farmId: farmId ?? this.farmId,
+      farmName: farmName ?? this.farmName,
+      isStaff: isStaff ?? this.isStaff,
+      isSubscriber: isSubscriber ?? this.isSubscriber,
+      refreshToken: refreshToken ?? this.refreshToken,
+      refreshTokenExpiry: refreshTokenExpiry ?? this.refreshTokenExpiry,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      customerId: customerId ?? this.customerId,
+      lastLoginTime: lastLoginTime ?? this.lastLoginTime,
+      selectedFarmId: selectedFarmId ?? this.selectedFarmId,
+    );
   }
 
   @override
@@ -142,5 +204,6 @@ class UserProfile extends Equatable {
         lastName,
         customerId,
         lastLoginTime,
+        selectedFarmId,
       ];
 }

@@ -10,6 +10,7 @@ import '../../domain/usecases/find_user_profile_by_username_usecase.dart';
 import '../../domain/usecases/find_user_profile_usecase.dart';
 import '../../domain/usecases/update_user_profile_usecase.dart';
 import '../controllers/user_profile_controller.dart';
+import '../../core/network/dio_interceptor.dart';
 import '../states/user_profile_state.dart';
 
 // Dio instance for UserProfile
@@ -23,6 +24,7 @@ final userProfileDioProvider = Provider<Dio>((ref) {
     sendTimeout: const Duration(seconds: 120), // 2 minutes for sending data
     headers: {'Content-Type': 'application/json'},
   );
+  dio.interceptors.add(AuthInterceptor());
   return dio;
 });
 
@@ -95,6 +97,7 @@ final userProfileControllerProvider =
       );
 
       return UserProfileController(
+        ref: ref,
         createUserProfileUseCase: createUserProfileUseCase,
         updateUserProfileUseCase: updateUserProfileUseCase,
         deleteUserProfileUseCase: deleteUserProfileUseCase,

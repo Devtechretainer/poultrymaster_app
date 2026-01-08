@@ -8,7 +8,7 @@ class User {
   final String lastName;
   final String username;
   final String email;
-  final String phoneNumber;
+  final String? phoneNumber;
   final String? token;
 
   const User({

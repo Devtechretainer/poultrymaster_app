@@ -58,29 +58,22 @@ class AuthDataSource {
         }
 
         // Handle the API response structure
-        // The API returns LoginResponse with ResponseData containing user info
         final responseObj = responseData['response'] as Map<String, dynamic>?;
-        final accessToken =
-            responseObj?['accessToken'] as Map<String, dynamic>?;
-        final token = accessToken?['token'] as String?;
+        
+        // More robust token extraction
+        String? token;
+        if (responseData.containsKey('token')) {
+          token = responseData['token'] as String?;
+        } else if (responseObj != null && responseObj.containsKey('accessToken')) {
+          final accessToken = responseObj['accessToken'] as Map<String, dynamic>?;
+          token = accessToken?['token'] as String?;
+        }
 
         // Extract user information from response
-        final userId =
-            responseData['userId'] as String? ??
-            responseObj?['userId'] as String? ??
-            '';
-        final username =
-            responseData['username'] as String? ??
-            responseObj?['username'] as String? ??
-            usernameOrEmail;
-        final farmId =
-            responseData['farmId'] as String? ??
-            responseObj?['farmId'] as String? ??
-            userId; // Fallback to userId if farmId not provided
-        final farmName =
-            responseData['farmName'] as String? ??
-            responseObj?['farmName'] as String? ??
-            '';
+        final userId = responseData['userId']?.toString() ?? responseObj?['userId']?.toString() ?? '';
+        final username = responseData['username']?.toString() ?? responseObj?['username']?.toString() ?? usernameOrEmail;
+        final farmId = responseData['farmId']?.toString() ?? responseObj?['farmId']?.toString() ?? userId;
+        final farmName = responseData['farmName']?.toString() ?? responseObj?['farmName']?.toString() ?? '';
 
         return UserModel(
           id: userId,
