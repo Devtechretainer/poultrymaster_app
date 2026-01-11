@@ -38,7 +38,7 @@ class DashboardHeader extends StatelessWidget {
       'Thursday',
       'Friday',
       'Saturday',
-      'Sunday'
+      'Sunday',
     ];
     final months = [
       'January',
@@ -52,7 +52,7 @@ class DashboardHeader extends StatelessWidget {
       'September',
       'October',
       'November',
-      'December'
+      'December',
     ];
     return '${weekdays[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}';
   }
@@ -67,7 +67,7 @@ class DashboardHeader extends StatelessWidget {
         horizontal: isSmall ? 16 : 24,
         vertical: 20,
       ),
-      color: Colors.green[100],
+      color: const Color(0xFF0F172A),
       child: Column(
         children: [
           Row(
@@ -76,11 +76,7 @@ class DashboardHeader extends StatelessWidget {
               if (showMenuButton)
                 Builder(
                   builder: (builderContext) => IconButton(
-                    icon: const Icon(
-                      Icons.menu,
-                      color: Colors.grey,
-                      size: 24,
-                    ),
+                    icon: const Icon(Icons.menu, color: Colors.white, size: 24),
                     onPressed:
                         onMenuPressed ??
                         () {
@@ -102,7 +98,7 @@ class DashboardHeader extends StatelessWidget {
                       style: TextStyle(
                         fontSize: isSmall ? 22 : 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -110,7 +106,7 @@ class DashboardHeader extends StatelessWidget {
                       _getFormattedDate(),
                       style: TextStyle(
                         fontSize: isSmall ? 14 : 16,
-                        color: Colors.grey[600],
+                        color: Colors.grey[300],
                       ),
                     ),
                   ],
@@ -123,10 +119,7 @@ class DashboardHeader extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.grey[400]!,
-                    width: 2,
-                  ),
+                  border: Border.all(color: Colors.grey[400]!, width: 2),
                 ),
                 child: ClipOval(
                   child: username != null && username!.isNotEmpty
@@ -162,17 +155,11 @@ class DashboardHeader extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.green[50],
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.green[200]!,
-                      width: 1,
-                    ),
+                    border: Border.all(color: Colors.green[200]!, width: 1),
                   ),
                   child: TextField(
                     controller: searchController,
-                    style: TextStyle(
-                      color: Colors.grey[800],
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.grey[800], fontSize: 16),
                     decoration: InputDecoration(
                       hintText: 'Search here...',
                       hintStyle: TextStyle(

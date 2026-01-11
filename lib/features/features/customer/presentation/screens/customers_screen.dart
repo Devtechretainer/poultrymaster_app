@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../domain/entities/customer.dart';
 import '../../../../../presentation/widgets/base_page_screen.dart';
 import '../../../../../presentation/widgets/empty_state_widget.dart';
+import '../../../../../presentation/widgets/info_item_widget.dart';
 import '../../../../../presentation/widgets/loading_widget.dart';
 import '../../../../../application/providers/customer_providers.dart';
 import '../../../../../presentation/screens/add_customer_screen.dart';
@@ -45,6 +46,112 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const AddCustomerScreen()));
+  }
+
+  void _showCustomerDetail(Customer customer) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Customer Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.person_outline,
+                    label: 'Name',
+                    value: customer.name,
+                  ),
+                  if (customer.contactEmail != null && customer.contactEmail!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.email_outlined,
+                      label: 'Email',
+                      value: customer.contactEmail!,
+                    ),
+                  ],
+                  if (customer.contactPhone != null && customer.contactPhone!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.phone_outlined,
+                      label: 'Phone',
+                      value: customer.contactPhone!,
+                    ),
+                  ],
+                  if (customer.city != null && customer.city!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.location_city_outlined,
+                      label: 'City',
+                      value: customer.city!,
+                    ),
+                  ],
+                  if (customer.address != null && customer.address!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.location_on_outlined,
+                      label: 'Address',
+                      value: customer.address!,
+                    ),
+                  ],
+                  if (customer.createdDate != null) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.calendar_today_outlined,
+                      label: 'Created Date',
+                      value: customer.createdDate!.toLocal().toString().split(' ')[0],
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditCustomer(customer);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit Customer'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _navigateToEditCustomer(Customer customer) {
@@ -166,6 +273,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
           child: _CustomerCard(
             customer: customer,
             index: index + 1,
+            onViewDetail: () => _showCustomerDetail(customer),
             onEdit: () => _navigateToEditCustomer(customer),
             onDelete: () => _deleteCustomer(customer.customerId!),
           ),
@@ -179,12 +287,14 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 class _CustomerCard extends StatelessWidget {
   final Customer customer;
   final int index;
+  final VoidCallback onViewDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _CustomerCard({
     required this.customer,
     required this.index,
+    required this.onViewDetail,
     required this.onEdit,
     required this.onDelete,
   });
@@ -302,7 +412,7 @@ class _CustomerCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onEdit,
+                onPressed: onViewDetail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[100],
                   foregroundColor: Colors.grey[800],
@@ -338,21 +448,23 @@ class _InfoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Colors.grey[600]),
-        const SizedBox(width: 8),
+        Icon(icon, size: 20, color: const Color(0xFF0F172A)),
+        const SizedBox(width: 10),
         Text(
           '$label: ',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
+          style: const TextStyle(
+            fontSize: 15,
+            color: Color(0xFF0F172A),
+            fontWeight: FontWeight.w500,
           ),
         ),
         Expanded(
           child: Text(
             value,
             style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
             ),
             overflow: TextOverflow.ellipsis,
           ),

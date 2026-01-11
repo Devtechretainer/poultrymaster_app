@@ -4,6 +4,7 @@ import '../../application/providers/expense_providers.dart';
 import '../../domain/entities/expense.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
 import 'add_edit_expense_screen.dart';
 
@@ -42,6 +43,99 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const AddEditExpenseScreen()));
+  }
+
+  void _showExpenseDetail(Expense expense) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Expense Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.category_outlined,
+                    label: 'Category',
+                    value: expense.category,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.attach_money_outlined,
+                    label: 'Amount',
+                    value: 'GH₵${expense.amount.toStringAsFixed(2)}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Date',
+                    value: expense.expenseDate.toLocal().toString().split(' ')[0],
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.payment_outlined,
+                    label: 'Payment Method',
+                    value: expense.paymentMethod,
+                  ),
+                  if (expense.description != null &&
+                      expense.description!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.description_outlined,
+                      label: 'Description',
+                      value: expense.description!,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditExpense(expense);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit Expense'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _navigateToEditExpense(Expense expense) {
@@ -162,6 +256,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
           child: _ExpenseCard(
             expense: expense,
             index: index + 1,
+            onViewDetail: () => _showExpenseDetail(expense),
             onEdit: () => _navigateToEditExpense(expense),
             onDelete: () => _deleteExpense(expense.expenseId),
           ),
@@ -175,12 +270,14 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
 class _ExpenseCard extends StatelessWidget {
   final Expense expense;
   final int index;
+  final VoidCallback onViewDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _ExpenseCard({
     required this.expense,
     required this.index,
+    required this.onViewDetail,
     required this.onEdit,
     required this.onDelete,
   });
@@ -293,7 +390,7 @@ class _ExpenseCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onEdit,
+                onPressed: onViewDetail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[100],
                   foregroundColor: Colors.grey[800],

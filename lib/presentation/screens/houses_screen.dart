@@ -4,6 +4,7 @@ import '../../application/providers/house_providers.dart';
 import '../../domain/entities/house.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
 import 'add_edit_house_screen.dart';
 
@@ -41,6 +42,84 @@ class _HousesScreenState extends ConsumerState<HousesScreen> {
   void _navigateToAddHouse() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const AddEditHouseScreen()),
+    );
+  }
+
+  void _showHouseDetail(House house) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'House Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.home_outlined,
+                    label: 'House Name',
+                    value: house.houseName,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.numbers_outlined,
+                    label: 'Capacity',
+                    value: '${house.capacity}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.location_on_outlined,
+                    label: 'Location',
+                    value: house.location,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditHouse(house);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit House'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -178,7 +257,9 @@ class _HousesScreenState extends ConsumerState<HousesScreen> {
             ),
             trailing: PopupMenuButton<String>(
               onSelected: (value) {
-                if (value == 'edit') {
+                if (value == 'view') {
+                  _showHouseDetail(house);
+                } else if (value == 'edit') {
                   _navigateToEditHouse(house);
                 } else if (value == 'delete') {
                   _deleteHouse(house.houseId);
@@ -186,17 +267,42 @@ class _HousesScreenState extends ConsumerState<HousesScreen> {
               },
               itemBuilder: (context) => [
                 const PopupMenuItem(
+                  value: 'view',
+                  child: Row(
+                    children: [
+                      Icon(Icons.visibility, size: 18),
+                      SizedBox(width: 8),
+                      Text('View Details'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
                   value: 'edit',
-                  child: Text('Edit'),
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, size: 18),
+                      SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
                 ),
                 const PopupMenuItem(
                   value: 'delete',
-                  child: Text('Delete'),
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, size: 18, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
             onTap: () {
-              _navigateToEditHouse(house);
+              _showHouseDetail(house);
             },
           );
         },

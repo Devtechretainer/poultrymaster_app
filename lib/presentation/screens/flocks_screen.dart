@@ -4,6 +4,7 @@ import '../../application/providers/flock_providers.dart';
 import '../../domain/entities/flock.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
 import 'flock_add_edit_form_screen.dart';
 
@@ -37,6 +38,135 @@ class _FlocksScreenState extends ConsumerState<FlocksScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const FlockAddEditFormScreen()));
+  }
+
+  void _showFlockDetail(Flock flock) {
+    final ageInDays = DateTime.now().difference(flock.startDate).inDays;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Flock Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.label_outline,
+                    label: 'Name',
+                    value: flock.name,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.category_outlined,
+                    label: 'Breed',
+                    value: flock.breed,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.numbers_outlined,
+                    label: 'Quantity',
+                    value: '${flock.quantity} birds',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Start Date',
+                    value: flock.startDate.toLocal().toString().split(' ')[0],
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.timer_outlined,
+                    label: 'Age',
+                    value: '$ageInDays days',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.check_circle_outline,
+                    label: 'Status',
+                    value: flock.active ? 'Active' : 'Inactive',
+                  ),
+                  if (flock.batchName != null) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.inventory_2_outlined,
+                      label: 'Batch',
+                      value: flock.batchName!,
+                    ),
+                  ],
+                  if (flock.houseId != null) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.home_outlined,
+                      label: 'House ID',
+                      value: '${flock.houseId}',
+                    ),
+                  ],
+                  if (flock.notes != null && flock.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.note_outlined,
+                      label: 'Notes',
+                      value: flock.notes!,
+                    ),
+                  ],
+                  if (!flock.active && flock.inactivationReason != null) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.info_outline,
+                      label: 'Inactivation Reason',
+                      value: flock.inactivationReason!,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditFlock(flock);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit Flock'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _navigateToEditFlock(Flock flock) {
@@ -155,6 +285,7 @@ class _FlocksScreenState extends ConsumerState<FlocksScreen> {
           child: _FlockCard(
             flock: flock,
             index: index + 1,
+            onViewDetail: () => _showFlockDetail(flock),
             onEdit: () => _navigateToEditFlock(flock),
             onDelete: () => _deleteFlock(flock.flockId),
           ),
@@ -168,12 +299,14 @@ class _FlocksScreenState extends ConsumerState<FlocksScreen> {
 class _FlockCard extends StatelessWidget {
   final Flock flock;
   final int index;
+  final VoidCallback onViewDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _FlockCard({
     required this.flock,
     required this.index,
+    required this.onViewDetail,
     required this.onEdit,
     required this.onDelete,
   });
@@ -294,7 +427,7 @@ class _FlockCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onEdit,
+                onPressed: onViewDetail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[100],
                   foregroundColor: Colors.grey[800],

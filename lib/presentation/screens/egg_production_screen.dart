@@ -46,6 +46,122 @@ class _EggProductionScreenState extends ConsumerState<EggProductionScreen> {
     );
   }
 
+  void _showEggProductionDetail(EggProduction eggProduction) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Egg Production Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.pets_outlined,
+                    label: 'Flock ID',
+                    value: '${eggProduction.flockId}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Production Date',
+                    value: eggProduction.productionDate.toLocal().toString().split(' ')[0],
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.egg_outlined,
+                    label: 'Total Production',
+                    value: '${eggProduction.totalProduction} eggs',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.access_time_outlined,
+                    label: '9 AM Production',
+                    value: '${eggProduction.production9AM} eggs',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.access_time_outlined,
+                    label: '12 PM Production',
+                    value: '${eggProduction.production12PM} eggs',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.access_time_outlined,
+                    label: '4 PM Production',
+                    value: '${eggProduction.production4PM} eggs',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.broken_image_outlined,
+                    label: 'Broken Eggs',
+                    value: '${eggProduction.brokenEggs}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.numbers_outlined,
+                    label: 'Egg Count',
+                    value: '${eggProduction.eggCount}',
+                  ),
+                  if (eggProduction.notes != null && eggProduction.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.note_outlined,
+                      label: 'Notes',
+                      value: eggProduction.notes!,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditEggProduction(eggProduction);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit Egg Production'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _navigateToEditEggProduction(EggProduction eggProduction) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -177,6 +293,7 @@ class _EggProductionScreenState extends ConsumerState<EggProductionScreen> {
           child: _EggProductionCard(
             record: record,
             index: index + 1,
+            onViewDetail: () => _showEggProductionDetail(record),
             onEdit: () => _navigateToEditEggProduction(record),
             onDelete: () => _deleteEggProduction(record.productionId),
           ),
@@ -190,12 +307,14 @@ class _EggProductionScreenState extends ConsumerState<EggProductionScreen> {
 class _EggProductionCard extends StatelessWidget {
   final EggProduction record;
   final int index;
+  final VoidCallback onViewDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _EggProductionCard({
     required this.record,
     required this.index,
+    required this.onViewDetail,
     required this.onEdit,
     required this.onDelete,
   });
@@ -307,7 +426,7 @@ class _EggProductionCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onEdit,
+                onPressed: onViewDetail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[100],
                   foregroundColor: Colors.grey[800],

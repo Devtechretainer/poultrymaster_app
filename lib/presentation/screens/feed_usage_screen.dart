@@ -45,6 +45,90 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
     ).push(MaterialPageRoute(builder: (_) => const AddEditFeedUsageScreen()));
   }
 
+  void _showFeedUsageDetail(FeedUsage feedUsage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Feed Usage Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.inventory_outlined,
+                    label: 'Feed Type',
+                    value: feedUsage.feedType,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.pets_outlined,
+                    label: 'Flock ID',
+                    value: '${feedUsage.flockId}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.scale_outlined,
+                    label: 'Quantity',
+                    value: '${feedUsage.quantityKg} Kg',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Usage Date',
+                    value: feedUsage.usageDate.toLocal().toString().split(' ')[0],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditFeedUsage(feedUsage);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit Feed Usage'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _navigateToEditFeedUsage(FeedUsage feedUsage) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -173,6 +257,7 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
           child: _FeedUsageCard(
             usage: usage,
             index: index + 1,
+            onViewDetail: () => _showFeedUsageDetail(usage),
             onEdit: () => _navigateToEditFeedUsage(usage),
             onDelete: () => _deleteFeedUsage(usage.feedUsageId),
           ),
@@ -186,12 +271,14 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
 class _FeedUsageCard extends StatelessWidget {
   final FeedUsage usage;
   final int index;
+  final VoidCallback onViewDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _FeedUsageCard({
     required this.usage,
     required this.index,
+    required this.onViewDetail,
     required this.onEdit,
     required this.onDelete,
   });
@@ -295,7 +382,7 @@ class _FeedUsageCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onEdit,
+                onPressed: onViewDetail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[100],
                   foregroundColor: Colors.grey[800],

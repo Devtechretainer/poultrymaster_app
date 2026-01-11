@@ -49,6 +49,146 @@ class _ProductionRecordsScreenState
     );
   }
 
+  void _showProductionRecordDetail(ProductionRecord productionRecord) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Production Record Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.pets_outlined,
+                    label: 'Flock ID',
+                    value: '${productionRecord.flockId}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Date',
+                    value: productionRecord.date.toLocal().toString().split(' ')[0],
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.numbers_outlined,
+                    label: 'Age in Weeks',
+                    value: '${productionRecord.ageInWeeks} weeks',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.numbers_outlined,
+                    label: 'Age in Days',
+                    value: '${productionRecord.ageInDays} days',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.group_outlined,
+                    label: 'Number of Birds',
+                    value: '${productionRecord.noOfBirds}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.warning_outlined,
+                    label: 'Mortality',
+                    value: '${productionRecord.mortality} birds',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.group_outlined,
+                    label: 'Birds Left',
+                    value: '${productionRecord.noOfBirdsLeft}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.inventory_2_outlined,
+                    label: 'Feed',
+                    value: '${productionRecord.feedKg} Kg',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.egg_outlined,
+                    label: 'Total Production',
+                    value: '${productionRecord.totalProduction} eggs',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.access_time_outlined,
+                    label: '9 AM Production',
+                    value: '${productionRecord.production9AM} eggs',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.access_time_outlined,
+                    label: '12 PM Production',
+                    value: '${productionRecord.production12PM} eggs',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.access_time_outlined,
+                    label: '4 PM Production',
+                    value: '${productionRecord.production4PM} eggs',
+                  ),
+                  if (productionRecord.medication != null && productionRecord.medication!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.medical_services_outlined,
+                      label: 'Medication',
+                      value: productionRecord.medication!,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditProductionRecord(productionRecord);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit Production Record'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _navigateToEditProductionRecord(ProductionRecord productionRecord) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -178,6 +318,7 @@ class _ProductionRecordsScreenState
           child: _ProductionRecordCard(
             record: record,
             index: index + 1,
+            onViewDetail: () => _showProductionRecordDetail(record),
             onEdit: () => _navigateToEditProductionRecord(record),
             onDelete: () => _deleteProductionRecord(record.id),
           ),
@@ -191,12 +332,14 @@ class _ProductionRecordsScreenState
 class _ProductionRecordCard extends StatelessWidget {
   final ProductionRecord record;
   final int index;
+  final VoidCallback onViewDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _ProductionRecordCard({
     required this.record,
     required this.index,
+    required this.onViewDetail,
     required this.onEdit,
     required this.onDelete,
   });
@@ -312,7 +455,7 @@ class _ProductionRecordCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onEdit,
+                onPressed: onViewDetail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[100],
                   foregroundColor: Colors.grey[800],

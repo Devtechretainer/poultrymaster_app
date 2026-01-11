@@ -47,6 +47,102 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
     );
   }
 
+  void _showFlockBatchDetail(MainFlockBatch batch) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Flock Batch Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.label_outline,
+                    label: 'Batch Name',
+                    value: batch.batchName,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.qr_code_outlined,
+                    label: 'Batch Code',
+                    value: batch.batchCode,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.category_outlined,
+                    label: 'Breed',
+                    value: batch.breed,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.numbers_outlined,
+                    label: 'Number of Birds',
+                    value: '${batch.numberOfBirds}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Start Date',
+                    value: batch.startDate.toLocal().toString().split(' ')[0],
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Created Date',
+                    value: batch.createdDate.toLocal().toString().split(' ')[0],
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditMainFlockBatch(batch);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit Batch'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _navigateToEditMainFlockBatch(MainFlockBatch mainFlockBatch) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -178,6 +274,7 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
           child: _FlockBatchCard(
             batch: batch,
             index: index + 1,
+            onViewDetail: () => _showFlockBatchDetail(batch),
             onEdit: () => _navigateToEditMainFlockBatch(batch),
             onDelete: () => _deleteMainFlockBatch(batch.batchId),
           ),
@@ -191,12 +288,14 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
 class _FlockBatchCard extends StatelessWidget {
   final MainFlockBatch batch;
   final int index;
+  final VoidCallback onViewDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _FlockBatchCard({
     required this.batch,
     required this.index,
+    required this.onViewDetail,
     required this.onEdit,
     required this.onDelete,
   });
@@ -306,7 +405,7 @@ class _FlockBatchCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onEdit,
+                onPressed: onViewDetail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[100],
                   foregroundColor: Colors.grey[800],

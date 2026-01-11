@@ -17,21 +17,23 @@ class InfoItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Colors.grey[600]),
-        const SizedBox(width: 8),
+        Icon(icon, size: 20, color: const Color(0xFF0F172A)),
+        const SizedBox(width: 10),
         Text(
           '$label: ',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
+          style: const TextStyle(
+            fontSize: 15,
+            color: Color(0xFF0F172A),
+            fontWeight: FontWeight.w500,
           ),
         ),
         Expanded(
           child: Text(
             value,
             style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -40,4 +42,3 @@ class InfoItemWidget extends StatelessWidget {
     );
   }
 }
-

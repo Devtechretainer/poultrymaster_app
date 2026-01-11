@@ -4,6 +4,7 @@ import '../../application/providers/sale_providers.dart';
 import '../../domain/entities/sale.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
 import 'add_edit_sale_screen.dart';
 
@@ -42,6 +43,117 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const AddEditSaleScreen()));
+  }
+
+  void _showSaleDetail(Sale sale) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Sale Details',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  InfoItemWidget(
+                    icon: Icons.shopping_bag_outlined,
+                    label: 'Product',
+                    value: sale.product,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.person_outline,
+                    label: 'Customer',
+                    value: sale.customerName,
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.numbers_outlined,
+                    label: 'Quantity',
+                    value: '${sale.quantity}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.attach_money_outlined,
+                    label: 'Unit Price',
+                    value: 'GH₵${sale.unitPrice.toStringAsFixed(2)}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.attach_money_outlined,
+                    label: 'Total Amount',
+                    value: 'GH₵${sale.totalAmount.toStringAsFixed(2)}',
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Date',
+                    value: sale.saleDate.toLocal().toString().split(' ')[0],
+                  ),
+                  const SizedBox(height: 16),
+                  InfoItemWidget(
+                    icon: Icons.payment_outlined,
+                    label: 'Payment Method',
+                    value: sale.paymentMethod,
+                  ),
+                  if (sale.saleDescription != null &&
+                      sale.saleDescription!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    InfoItemWidget(
+                      icon: Icons.description_outlined,
+                      label: 'Description',
+                      value: sale.saleDescription!,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _navigateToEditSale(sale);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Edit Sale'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _navigateToEditSale(Sale sale) {
@@ -162,6 +274,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
           child: _SaleCard(
             sale: sale,
             index: index + 1,
+            onViewDetail: () => _showSaleDetail(sale),
             onEdit: () => _navigateToEditSale(sale),
             onDelete: () => _deleteSale(sale.saleId),
           ),
@@ -175,12 +288,14 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
 class _SaleCard extends StatelessWidget {
   final Sale sale;
   final int index;
+  final VoidCallback onViewDetail;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const _SaleCard({
     required this.sale,
     required this.index,
+    required this.onViewDetail,
     required this.onEdit,
     required this.onDelete,
   });
@@ -296,7 +411,7 @@ class _SaleCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onEdit,
+                onPressed: onViewDetail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[100],
                   foregroundColor: Colors.grey[800],
