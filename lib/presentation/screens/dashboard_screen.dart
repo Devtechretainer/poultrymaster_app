@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/dashboard_providers.dart';
 import '../../application/states/dashboard_state.dart';
@@ -278,18 +279,18 @@ class _SummaryCardsGrid extends StatelessWidget {
         // Always use 2 columns for 2x2 grid
         final crossAxisCount = 2;
 
-        // Aspect ratio adjusted for 2x2 grid layout
+        // Aspect ratio adjusted for 2x2 grid layout - slightly taller to prevent overflow
         final childAspectRatio = isMobileScreen
-            ? 1.4 // Slightly taller cards on mobile for better readability
-            : 1.5; // Standard aspect ratio for 2x2 grid
+            ? 1.35 // Slightly taller cards on mobile to prevent overflow
+            : 1.45; // Standard aspect ratio for 2x2 grid with extra height
 
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+            crossAxisSpacing: 16.w,
+            mainAxisSpacing: 16.h,
             childAspectRatio: childAspectRatio,
           ),
           itemCount: cards.length,

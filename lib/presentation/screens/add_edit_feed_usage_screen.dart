@@ -34,7 +34,7 @@ class _AddEditFeedUsageScreenState
     'Layer Feed',
     'Broiler Feed',
     'Organic Feed',
-    'Custom Mix'
+    'Custom Mix',
   ];
 
   bool get _isEditMode => widget.feedUsage != null;
@@ -64,9 +64,11 @@ class _AddEditFeedUsageScreenState
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _selectedUsageDate) {
-      setState(() {
-        _selectedUsageDate = picked;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedUsageDate = picked;
+        });
+      }
     }
   }
 
@@ -175,10 +177,15 @@ class _AddEditFeedUsageScreenState
     final flocksLoading = flockState.isLoading;
 
     if (_isEditMode && _selectedFlock == null && flocks.isNotEmpty) {
-      final selected = flocks
-          .firstWhereOrNull((flock) => flock.flockId == widget.feedUsage!.flockId);
+      final selected = flocks.firstWhereOrNull(
+        (flock) => flock.flockId == widget.feedUsage!.flockId,
+      );
       if (selected != null) {
-        Future.microtask(() => setState(() => _selectedFlock = selected));
+        Future.microtask(() {
+          if (mounted) {
+            setState(() => _selectedFlock = selected);
+          }
+        });
       }
     }
 
@@ -200,128 +207,151 @@ class _AddEditFeedUsageScreenState
                 Padding(
                   padding: const EdgeInsets.all(0),
                   child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomDropdownButtonFormField<Flock>(
-                          value: _selectedFlock,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Flock *',
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InputTheme.labelWidget('Flock *'),
+                          CustomDropdownButtonFormField<Flock>(
+                            value: _selectedFlock,
+                            decoration: InputTheme.dropdownDecoration(
+                              label: 'Flock *',
+                            ),
+                            items: flocksLoading
+                                ? []
+                                : flocks.map((Flock flock) {
+                                    return DropdownMenuItem<Flock>(
+                                      value: flock,
+                                      child: Text(flock.name),
+                                    );
+                                  }).toList(),
+                            onChanged: flocksLoading
+                                ? null
+                                : (Flock? newValue) {
+                                    setState(() {
+                                      _selectedFlock = newValue;
+                                    });
+                                  },
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Please select a flock';
+                              }
+                              return null;
+                            },
+                            isLoading: flocksLoading,
+                            loadingMessage: 'Loading flocks...',
+                            emptyMessage: flockState.error != null
+                                ? 'Error: ${flockState.error}'
+                                : 'No flocks found. Please add a flock first.',
                           ),
-                          items: flocksLoading
-                              ? []
-                              : flocks.map((Flock flock) {
-                                  return DropdownMenuItem<Flock>(
-                                    value: flock,
-                                    child: Text(flock.name),
-                                  );
-                                }).toList(),
-                          onChanged: flocksLoading
-                              ? null
-                              : (Flock? newValue) {
-                                  setState(() {
-                                    _selectedFlock = newValue;
-                                  });
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InputTheme.labelWidget('Usage Date *'),
+                          GestureDetector(
+                            onTap: () => _selectUsageDate(context),
+                            child: AbsorbPointer(
+                              child: TextFormField(
+                                controller: TextEditingController(
+                                  text: _selectedUsageDate == null
+                                      ? ''
+                                      : '${_selectedUsageDate!.toLocal()}'
+                                            .split(' ')[0],
+                                ),
+                                decoration: InputTheme.dateDecoration(
+                                  label: 'Usage Date *',
+                                  hint: 'DD/MM/YYYY',
+                                ),
+                                validator: (value) {
+                                  if (_selectedUsageDate == null) {
+                                    return 'Usage Date is required';
+                                  }
+                                  return null;
                                 },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a flock';
-                            }
-                            return null;
-                          },
-                          isLoading: flocksLoading,
-                          loadingMessage: 'Loading flocks...',
-                          emptyMessage: flockState.error != null
-                              ? 'Error: ${flockState.error}'
-                              : 'No flocks found. Please add a flock first.',
-                        ),
-                        const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () => _selectUsageDate(context),
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              controller: TextEditingController(
-                                text: _selectedUsageDate == null
-                                    ? ''
-                                    : '${_selectedUsageDate!.toLocal()}'
-                                        .split(' ')[0],
                               ),
-                              decoration: InputTheme.dateDecoration(
-                                label: 'Usage Date *',
-                                hint: 'DD/MM/YYYY',
-                              ),
-                              validator: (value) {
-                                if (_selectedUsageDate == null) {
-                                  return 'Usage Date is required';
-                                }
-                                return null;
-                              },
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedFeedType,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Feed Type *',
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InputTheme.labelWidget('Feed Type *'),
+                          DropdownButtonFormField<String>(
+                            initialValue: _selectedFeedType,
+                            decoration: InputTheme.dropdownDecoration(
+                              label: 'Feed Type *',
+                            ),
+                            items: _feedTypes.map((String feedType) {
+                              return DropdownMenuItem<String>(
+                                value: feedType,
+                                child: Text(feedType),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _selectedFeedType = newValue;
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Please select a feed type';
+                              }
+                              return null;
+                            },
                           ),
-                          items: _feedTypes.map((String feedType) {
-                            return DropdownMenuItem<String>(
-                              value: feedType,
-                              child: Text(feedType),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedFeedType = newValue;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a feed type';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _quantityKgController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Quantity (Kg) *',
-                            hint: 'Enter amount',
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InputTheme.labelWidget('Quantity (Kg) *'),
+                          TextFormField(
+                            controller: _quantityKgController,
+                            decoration: InputTheme.standardDecoration(
+                              label: 'Quantity (Kg) *',
+                              hint: 'Enter amount',
+                            ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Quantity (Kg) is required';
+                              }
+                              if (double.tryParse(value) == null) {
+                                return 'Please enter a valid number';
+                              }
+                              return null;
+                            },
                           ),
-                          keyboardType:
-                              const TextInputType.numberWithOptions(decimal: true),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Quantity (Kg) is required';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: isLoading ? null : _submitForm,
-                            style: FormButtonStyle.primary(),
-                            child: isLoading
-                                ? const SizedBox(
-                                    child: LoadingWidget.small(),
-                                  )
-                                : const Text(
-                                    'Save Record',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _submitForm,
+                          style: FormButtonStyle.primary(),
+                          child: isLoading
+                              ? const SizedBox(child: LoadingWidget.small())
+                              : const Text(
+                                  'Save Record',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                          ),
+                                ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

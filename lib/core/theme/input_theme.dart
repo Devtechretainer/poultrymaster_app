@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 /// Input field theme matching the modern form design
 class InputTheme {
   /// Standard input decoration for text fields
+  /// Labels are positioned above the field, not floating inside
   static InputDecoration standardDecoration({
     required String label,
     String? hint,
@@ -10,13 +11,8 @@ class InputTheme {
     Widget? prefixIcon,
   }) {
     return InputDecoration(
-      labelText: label,
+      labelText: null, // Remove label from inside field
       hintText: hint,
-      labelStyle: const TextStyle(
-        color: Colors.grey,
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-      ),
       hintStyle: TextStyle(
         color: Colors.grey[400],
         fontSize: 14,
@@ -46,6 +42,21 @@ class InputTheme {
       ),
       suffixIcon: suffixIcon,
       prefixIcon: prefixIcon,
+    );
+  }
+
+  /// Creates a label widget to be placed above input fields
+  static Widget labelWidget(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.grey,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 

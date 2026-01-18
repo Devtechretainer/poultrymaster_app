@@ -4,8 +4,10 @@ import '../../application/providers/flock_providers.dart';
 import '../../domain/entities/flock.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
-import '../widgets/info_item_widget.dart';
+import '../widgets/ereceipt_detail_widget.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/unified_list_card_widget.dart';
+import '../widgets/asset_image_widget.dart';
 import 'flock_add_edit_form_screen.dart';
 
 /// Flocks Screen
@@ -46,123 +48,70 @@ class _FlocksScreenState extends ConsumerState<FlocksScreen> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Flock Details',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: EReceiptDetailWidget(
+            title: 'Flock Details',
+            sections: [
+              // Item Card Section with Flock Icon
+              DetailSection(
+                type: DetailSectionType.itemCard,
+                title: flock.name,
+                subtitle: 'Flock Management',
+                footer: 'Breed: ${flock.breed}',
+                imageWidget: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(height: 24),
-                  InfoItemWidget(
-                    icon: Icons.label_outline,
-                    label: 'Name',
-                    value: flock.name,
+                  padding: const EdgeInsets.all(16),
+                  child: AssetImageWidget(
+                    assetPath: 'assets/icons/flock.png',
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.category_outlined,
-                    label: 'Breed',
-                    value: flock.breed,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.numbers_outlined,
-                    label: 'Quantity',
-                    value: '${flock.quantity} birds',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.calendar_today_outlined,
+                ),
+              ),
+              DetailSection(
+                type: DetailSectionType.infoList,
+                title: 'Flock Information',
+                items: [
+                  DetailItem(label: 'Name', value: flock.name),
+                  DetailItem(label: 'Breed', value: flock.breed),
+                  DetailItem(label: 'Quantity', value: '${flock.quantity} birds'),
+                  DetailItem(
                     label: 'Start Date',
                     value: flock.startDate.toLocal().toString().split(' ')[0],
                   ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.timer_outlined,
-                    label: 'Age',
-                    value: '$ageInDays days',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.check_circle_outline,
+                  DetailItem(label: 'Age', value: '$ageInDays days'),
+                  DetailItem(
                     label: 'Status',
                     value: flock.active ? 'Active' : 'Inactive',
+                    valueColor: flock.active ? Colors.green : Colors.orange,
                   ),
-                  if (flock.batchName != null) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.inventory_2_outlined,
-                      label: 'Batch',
-                      value: flock.batchName!,
-                    ),
-                  ],
-                  if (flock.houseId != null) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.home_outlined,
-                      label: 'House ID',
-                      value: '${flock.houseId}',
-                    ),
-                  ],
-                  if (flock.notes != null && flock.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.note_outlined,
-                      label: 'Notes',
-                      value: flock.notes!,
-                    ),
-                  ],
-                  if (!flock.active && flock.inactivationReason != null) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.info_outline,
+                  if (flock.batchName != null)
+                    DetailItem(label: 'Batch', value: flock.batchName!),
+                  if (flock.houseId != null)
+                    DetailItem(label: 'House ID', value: '${flock.houseId}'),
+                  if (flock.notes != null && flock.notes!.isNotEmpty)
+                    DetailItem(label: 'Notes', value: flock.notes!),
+                  if (!flock.active && flock.inactivationReason != null)
+                    DetailItem(
                       label: 'Inactivation Reason',
                       value: flock.inactivationReason!,
                     ),
-                  ],
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _navigateToEditFlock(flock);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Edit Flock'),
-                    ),
-                  ),
                 ],
               ),
-            ),
+            ],
+            actionButtonLabel: 'Edit Flock',
+            actionButtonColor: const Color(0xFF2563EB),
+            onActionPressed: () {
+              Navigator.of(context).pop();
+              _navigateToEditFlock(flock);
+            },
           ),
         );
       },
@@ -212,9 +161,10 @@ class _FlocksScreenState extends ConsumerState<FlocksScreen> {
       onLogout: widget.onLogout,
       pageTitle: 'Flocks',
       pageSubtitle: 'Manage your bird flocks',
-      pageIcon: Icons.eco,
+      pageIconAsset: 'assets/icons/flock.png',
       iconBackgroundColor: const Color(0xFFECFDF5),
       searchController: _searchController,
+      showSearchInHeader: true, // Show search in page header
       actionButton: ElevatedButton.icon(
         onPressed: _navigateToAddFlock,
         icon: const Icon(Icons.add, color: Colors.white, size: 16),
@@ -276,207 +226,32 @@ class _FlocksScreenState extends ConsumerState<FlocksScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero, // No padding for end-to-end cards
       itemCount: flocks.length,
       itemBuilder: (context, index) {
         final flock = flocks[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _FlockCard(
-            flock: flock,
-            index: index + 1,
-            onViewDetail: () => _showFlockDetail(flock),
-            onEdit: () => _navigateToEditFlock(flock),
-            onDelete: () => _deleteFlock(flock.flockId),
-          ),
+        final ageInDays = DateTime.now().difference(flock.startDate).inDays;
+        final fields = <CardField>[
+          CardField(label: 'Breed', value: flock.breed),
+          CardField(label: 'Quantity', value: '${flock.quantity} birds'),
+          CardField(label: 'Age', value: '$ageInDays days'),
+        ];
+        if (flock.batchName != null) {
+          fields.add(CardField(label: 'Batch', value: flock.batchName!));
+        }
+        
+        return UnifiedListCardWidget(
+          id: 'FLOCK-${flock.flockId}',
+          title: flock.name,
+          fields: fields,
+          status: flock.active ? 'Active' : 'Inactive',
+          statusColor: flock.active ? Colors.green : Colors.orange,
+          onEdit: () => _navigateToEditFlock(flock),
+          onDelete: () => _deleteFlock(flock.flockId),
+          onSend: () => _showFlockDetail(flock),
+          sendButtonLabel: 'View Details',
         );
       },
-    );
-  }
-}
-
-/// Flock Card Widget - Card-based design
-class _FlockCard extends StatelessWidget {
-  final Flock flock;
-  final int index;
-  final VoidCallback onViewDetail;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _FlockCard({
-    required this.flock,
-    required this.index,
-    required this.onViewDetail,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Calculate age in days
-    final ageInDays = DateTime.now().difference(flock.startDate).inDays;
-
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with number and title
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$index',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    flock.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      onEdit();
-                    } else if (value == 'delete') {
-                      onDelete();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Info items with icons
-            _InfoItem(
-              icon: Icons.category_outlined,
-              label: 'Breed',
-              value: flock.breed,
-            ),
-            const SizedBox(height: 12),
-            _InfoItem(
-              icon: Icons.numbers_outlined,
-              label: 'Quantity',
-              value: '${flock.quantity} birds',
-            ),
-            const SizedBox(height: 12),
-            _InfoItem(
-              icon: Icons.calendar_today_outlined,
-              label: 'Age',
-              value: '$ageInDays days',
-            ),
-            const SizedBox(height: 12),
-            _InfoItem(
-              icon: Icons.check_circle_outline,
-              label: 'Status',
-              value: flock.active ? 'Active' : 'Inactive',
-            ),
-            if (flock.batchName != null) ...[
-              const SizedBox(height: 12),
-              _InfoItem(
-                icon: Icons.inventory_2_outlined,
-                label: 'Batch',
-                value: flock.batchName!,
-              ),
-            ],
-            const SizedBox(height: 16),
-            // Action button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onViewDetail,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
-                  foregroundColor: Colors.grey[800],
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('View Details'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Info Item Widget - Displays icon, label, and value
-class _InfoItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _InfoItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/main_flock_batch_providers.dart';
 import '../../domain/entities/main_flock_batch.dart';
@@ -58,9 +59,11 @@ class _AddEditMainFlockBatchScreenState
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _selectedStartDate) {
-      setState(() {
-        _selectedStartDate = picked;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedStartDate = picked;
+        });
+      }
     }
   }
 
@@ -160,88 +163,193 @@ class _AddEditMainFlockBatchScreenState
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextFormField(
-                          controller: _batchCodeController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Batch Code *',
-                            hint: 'Enter batch code',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Batch Code is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _batchNameController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Batch Name *',
-                            hint: 'Enter batch name',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Batch Name is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _breedController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Breed *',
-                            hint: 'Enter breed',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Breed is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _numberOfBirdsController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Number of Birds *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Number of Birds is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () => _selectStartDate(context),
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              controller: TextEditingController(
-                                text: _selectedStartDate == null
-                                    ? ''
-                                    : '${_selectedStartDate!.toLocal()}'
-                                        .split(' ')[0],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Batch Code *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
                               ),
-                              decoration: InputTheme.dateDecoration(
-                                label: 'Start Date *',
-                                hint: 'DD/MM/YYYY',
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _batchCodeController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter batch code',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
                               ),
                               validator: (value) {
-                                if (_selectedStartDate == null) {
-                                  return 'Start Date is required';
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Batch Code is required';
                                 }
                                 return null;
                               },
                             ),
-                          ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Batch Name *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _batchNameController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter batch name',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Batch Name is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Breed *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _breedController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter breed',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Breed is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Number of Birds *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _numberOfBirdsController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Number of Birds is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Start Date *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            GestureDetector(
+                              onTap: () => _selectStartDate(context),
+                              child: AbsorbPointer(
+                                child: TextFormField(
+                                  controller: TextEditingController(
+                                    text: _selectedStartDate == null
+                                        ? ''
+                                        : '${_selectedStartDate!.toLocal()}'
+                                            .split(' ')[0],
+                                  ),
+                                  style: TextStyle(fontSize: 14.sp),
+                                  decoration: InputTheme.dateDecoration(
+                                    label: '',
+                                    hint: 'DD/MM/YYYY',
+                                  ).copyWith(
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 14.h,
+                                    ),
+                                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                                  ),
+                                  validator: (value) {
+                                    if (_selectedStartDate == null) {
+                                      return 'Start Date is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 24),
                         SizedBox(

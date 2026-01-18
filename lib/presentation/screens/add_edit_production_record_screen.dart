@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:collection/collection.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/production_record_providers.dart';
@@ -79,9 +80,11 @@ class _AddEditProductionRecordScreenState
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedDate = picked;
+        });
+      }
     }
   }
 
@@ -217,214 +220,444 @@ class _AddEditProductionRecordScreenState
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomDropdownButtonFormField<Flock>(
-                          value: _selectedFlock,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Flock *',
-                          ),
-                          items: flocksLoading
-                              ? []
-                              : flocks.map((Flock flock) {
-                                  return DropdownMenuItem<Flock>(
-                                    value: flock,
-                                    child: Text(flock.name),
-                                  );
-                                }).toList(),
-                          onChanged: flocksLoading
-                              ? null
-                              : (Flock? newValue) {
-                                  setState(() {
-                                    _selectedFlock = newValue;
-                                  });
-                                },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a flock';
-                            }
-                            return null;
-                          },
-                          isLoading: flocksLoading,
-                          loadingMessage: 'Loading flocks...',
-                          emptyMessage: flockState.error != null
-                              ? 'Error: ${flockState.error}'
-                              : 'No flocks found. Please add a flock first.',
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _ageInWeeksController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Age in Weeks *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Age in Weeks is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _ageInDaysController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Age in Days *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Age in Days is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () => _selectDate(context),
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              controller: TextEditingController(
-                                text: _selectedDate == null
-                                    ? ''
-                                    : '${_selectedDate!.toLocal()}'
-                                        .split(' ')[0],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Flock *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
                               ),
-                              decoration: InputTheme.dateDecoration(
-                                label: 'Date *',
-                                hint: 'DD/MM/YYYY',
+                            ),
+                            SizedBox(height: 8.h),
+                            CustomDropdownButtonFormField<Flock>(
+                              value: _selectedFlock,
+                              decoration: InputTheme.dropdownDecoration(
+                                label: '',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
                               ),
+                              items: flocksLoading
+                                  ? []
+                                  : flocks.map((Flock flock) {
+                                      return DropdownMenuItem<Flock>(
+                                        value: flock,
+                                        child: Text(flock.name),
+                                      );
+                                    }).toList(),
+                              onChanged: flocksLoading
+                                  ? null
+                                  : (Flock? newValue) {
+                                      setState(() {
+                                        _selectedFlock = newValue;
+                                      });
+                                    },
                               validator: (value) {
-                                if (_selectedDate == null) {
-                                  return 'Date is required';
+                                if (value == null) {
+                                  return 'Please select a flock';
+                                }
+                                return null;
+                              },
+                              isLoading: flocksLoading,
+                              loadingMessage: 'Loading flocks...',
+                              emptyMessage: flockState.error != null
+                                  ? 'Error: ${flockState.error}'
+                                  : 'No flocks found. Please add a flock first.',
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Age in Weeks *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _ageInWeeksController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Age in Weeks is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
                                 }
                                 return null;
                               },
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _noOfBirdsController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Number of Birds *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Number of Birds is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Age in Days *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _ageInDaysController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Age in Days is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _mortalityController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Mortality *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Mortality is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Date *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            GestureDetector(
+                              onTap: () => _selectDate(context),
+                              child: AbsorbPointer(
+                                child: TextFormField(
+                                  controller: TextEditingController(
+                                    text: _selectedDate == null
+                                        ? ''
+                                        : '${_selectedDate!.toLocal()}'
+                                            .split(' ')[0],
+                                  ),
+                                  style: TextStyle(fontSize: 14.sp),
+                                  decoration: InputTheme.dateDecoration(
+                                    label: '',
+                                    hint: 'DD/MM/YYYY',
+                                  ).copyWith(
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 14.h,
+                                    ),
+                                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                                  ),
+                                  validator: (value) {
+                                    if (_selectedDate == null) {
+                                      return 'Date is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _feedKgController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Feed (Kg) *',
-                            hint: 'Enter amount',
-                          ),
-                          keyboardType:
-                              const TextInputType.numberWithOptions(decimal: true),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Feed (Kg) is required';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Number of Birds *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _noOfBirdsController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Number of Birds is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _medicationController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Medication (Optional)',
-                            hint: 'Enter medication',
-                          ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Mortality *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _mortalityController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Mortality is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _production9AMController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Production 9 AM *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Production 9 AM is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Feed (Kg) *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _feedKgController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter amount',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(decimal: true),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Feed (Kg) is required';
+                                }
+                                if (double.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _production12PMController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Production 12 PM *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Production 12 PM is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Medication (Optional)',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _medicationController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter medication',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _production4PMController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Production 4 PM *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Production 4 PM is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Production 9 AM *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _production9AMController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Production 9 AM is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Production 12 PM *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _production12PMController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Production 12 PM is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Production 4 PM *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _production4PMController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Production 4 PM is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 24),
                         SizedBox(

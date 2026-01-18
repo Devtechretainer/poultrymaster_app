@@ -4,8 +4,9 @@ import '../../application/providers/sale_providers.dart';
 import '../../domain/entities/sale.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
-import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/unified_list_card_widget.dart';
+import '../widgets/ereceipt_detail_widget.dart';
 import 'add_edit_sale_screen.dart';
 
 class SalesScreen extends ConsumerStatefulWidget {
@@ -46,113 +47,84 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   }
 
   void _showSaleDetail(Sale sale) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Sale Details',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  InfoItemWidget(
-                    icon: Icons.shopping_bag_outlined,
-                    label: 'Product',
-                    value: sale.product,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.person_outline,
-                    label: 'Customer',
-                    value: sale.customerName,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.numbers_outlined,
-                    label: 'Quantity',
-                    value: '${sale.quantity}',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.attach_money_outlined,
-                    label: 'Unit Price',
-                    value: 'GH₵${sale.unitPrice.toStringAsFixed(2)}',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.attach_money_outlined,
-                    label: 'Total Amount',
-                    value: 'GH₵${sale.totalAmount.toStringAsFixed(2)}',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.calendar_today_outlined,
-                    label: 'Date',
-                    value: sale.saleDate.toLocal().toString().split(' ')[0],
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.payment_outlined,
-                    label: 'Payment Method',
-                    value: sale.paymentMethod,
-                  ),
-                  if (sale.saleDescription != null &&
-                      sale.saleDescription!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.description_outlined,
-                      label: 'Description',
-                      value: sale.saleDescription!,
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _navigateToEditSale(sale);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Edit Sale'),
-                    ),
-                  ),
-                ],
-              ),
+    final dateTime = sale.saleDate.toLocal();
+    final dateStr = dateTime.toString().split(' ')[0];
+    final timeStr = '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')} ${dateTime.hour >= 12 ? 'PM' : 'AM'}';
+    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EReceiptDetailWidget(
+          title: 'Sale Details',
+          sections: [
+            // Item Card Section
+            DetailSection(
+              type: DetailSectionType.itemCard,
+              title: sale.product,
+              subtitle: 'Product | Qty: ${sale.quantity.toString().padLeft(2, '0')}',
+              footer: 'by ${sale.customerName}',
+              icon: Icons.shopping_bag_outlined,
             ),
-          ),
-        );
-      },
+            // Order Information Section
+            DetailSection(
+              type: DetailSectionType.infoList,
+              title: 'Order Information',
+              items: [
+                DetailItem(
+                  label: 'Order ID',
+                  value: 'SALE-${sale.saleId}',
+                ),
+                DetailItem(
+                  label: 'Order Type',
+                  value: 'Sale',
+                ),
+                DetailItem(
+                  label: 'Customer',
+                  value: sale.customerName,
+                ),
+                DetailItem(
+                  label: 'Order Date',
+                  value: '$dateStr | $timeStr',
+                ),
+                if (sale.saleDescription != null &&
+                    sale.saleDescription!.isNotEmpty)
+                  DetailItem(
+                    label: 'Description',
+                    value: sale.saleDescription!,
+                  ),
+              ],
+            ),
+            // Payment Summary Section
+            DetailSection(
+              type: DetailSectionType.summary,
+              title: 'Payment Summary',
+              items: [
+                DetailItem(
+                  label: 'Sub Total',
+                  value: 'GH₵${sale.totalAmount.toStringAsFixed(2)}',
+                ),
+                DetailItem(
+                  label: 'Unit Price',
+                  value: '+ GH₵${sale.unitPrice.toStringAsFixed(2)}',
+                ),
+                DetailItem(
+                  label: 'Quantity',
+                  value: '${sale.quantity}',
+                ),
+                DetailItem(
+                  label: 'Payment Method',
+                  value: sale.paymentMethod,
+                ),
+              ],
+            ),
+          ],
+          actionButtonLabel: 'Edit Sale',
+          actionButtonColor: const Color(0xFF2563EB),
+          onActionPressed: () {
+            Navigator.of(context).pop();
+            _navigateToEditSale(sale);
+          },
+        ),
+      ),
     );
   }
 
@@ -204,6 +176,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       pageIcon: Icons.shopping_bag,
       iconBackgroundColor: const Color(0xFFECFDF5),
       searchController: _searchController,
+      showSearchInHeader: true, // Show search in page header
       actionButton: ElevatedButton.icon(
         onPressed: _navigateToAddSale,
         icon: const Icon(Icons.add, color: Colors.white, size: 16),
@@ -265,202 +238,32 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero, // No padding for end-to-end cards
       itemCount: sales.length,
       itemBuilder: (context, index) {
         final sale = sales[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _SaleCard(
-            sale: sale,
-            index: index + 1,
-            onViewDetail: () => _showSaleDetail(sale),
-            onEdit: () => _navigateToEditSale(sale),
-            onDelete: () => _deleteSale(sale.saleId),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Sale Card Widget - Card-based design
-class _SaleCard extends StatelessWidget {
-  final Sale sale;
-  final int index;
-  final VoidCallback onViewDetail;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _SaleCard({
-    required this.sale,
-    required this.index,
-    required this.onViewDetail,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with number and title
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$index',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    sale.product,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      onEdit();
-                    } else if (value == 'delete') {
-                      onDelete();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Info items with icons
-            _InfoItem(
-              icon: Icons.person_outline,
-              label: 'Customer',
-              value: sale.customerName,
-            ),
-            const SizedBox(height: 12),
-            _InfoItem(
-              icon: Icons.numbers_outlined,
-              label: 'Quantity',
-              value: '${sale.quantity}',
-            ),
-            const SizedBox(height: 12),
-            _InfoItem(
-              icon: Icons.attach_money_outlined,
+        return UnifiedListCardWidget(
+          id: 'SALE-${sale.saleId}',
+          title: sale.product,
+          fields: [
+            CardField(label: 'Customer', value: sale.customerName),
+            CardField(label: 'Quantity', value: '${sale.quantity}'),
+            CardField(
               label: 'Total Amount',
               value: 'GH₵${sale.totalAmount.toStringAsFixed(2)}',
             ),
-            const SizedBox(height: 12),
-            _InfoItem(
-              icon: Icons.calendar_today_outlined,
+            CardField(
               label: 'Date',
               value: sale.saleDate.toLocal().toString().split(' ')[0],
             ),
-            const SizedBox(height: 12),
-            _InfoItem(
-              icon: Icons.payment_outlined,
-              label: 'Payment',
-              value: sale.paymentMethod,
-            ),
-            const SizedBox(height: 16),
-            // Action button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onViewDetail,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
-                  foregroundColor: Colors.grey[800],
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('View Details'),
-              ),
-            ),
+            CardField(label: 'Payment', value: sale.paymentMethod),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Info Item Widget - Displays icon, label, and value
-class _InfoItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _InfoItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Text(
-          '$label: ',
-          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
+          onEdit: () => _navigateToEditSale(sale),
+          onDelete: () => _deleteSale(sale.saleId),
+          onSend: () => _showSaleDetail(sale),
+          sendButtonLabel: 'View Details',
+        );
+      },
     );
   }
 }

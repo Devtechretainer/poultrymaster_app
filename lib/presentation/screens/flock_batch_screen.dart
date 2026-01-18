@@ -4,8 +4,9 @@ import '../../application/providers/main_flock_batch_providers.dart';
 import '../../domain/entities/main_flock_batch.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
-import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/unified_list_card_widget.dart';
+import '../widgets/ereceipt_detail_widget.dart';
 import 'add_edit_main_flock_batch_screen.dart';
 
 class FlockBatchScreen extends ConsumerStatefulWidget {
@@ -52,91 +53,39 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Flock Batch Details',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  InfoItemWidget(
-                    icon: Icons.label_outline,
-                    label: 'Batch Name',
-                    value: batch.batchName,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.qr_code_outlined,
-                    label: 'Batch Code',
-                    value: batch.batchCode,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.category_outlined,
-                    label: 'Breed',
-                    value: batch.breed,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.numbers_outlined,
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: EReceiptDetailWidget(
+            title: 'Flock Batch Details',
+            sections: [
+              DetailSection(
+                type: DetailSectionType.infoList,
+                title: 'Batch Information',
+                items: [
+                  DetailItem(label: 'Batch Name', value: batch.batchName),
+                  DetailItem(label: 'Batch Code', value: batch.batchCode),
+                  DetailItem(label: 'Breed', value: batch.breed),
+                  DetailItem(
                     label: 'Number of Birds',
                     value: '${batch.numberOfBirds}',
                   ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.calendar_today_outlined,
+                  DetailItem(
                     label: 'Start Date',
                     value: batch.startDate.toLocal().toString().split(' ')[0],
                   ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.calendar_today_outlined,
+                  DetailItem(
                     label: 'Created Date',
                     value: batch.createdDate.toLocal().toString().split(' ')[0],
                   ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _navigateToEditMainFlockBatch(batch);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Edit Batch'),
-                    ),
-                  ),
                 ],
               ),
-            ),
+            ],
+            actionButtonLabel: 'Edit Batch',
+            actionButtonColor: const Color(0xFF2563EB),
+            onActionPressed: () {
+              Navigator.of(context).pop();
+              _navigateToEditMainFlockBatch(batch);
+            },
           ),
         );
       },
@@ -196,6 +145,7 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
       pageIcon: Icons.grass,
       iconBackgroundColor: const Color(0xFFE0F7FA), // Light Cyan
       searchController: _searchController,
+      showSearchInHeader: true,
       actionButton: ElevatedButton.icon(
         onPressed: _navigateToAddMainFlockBatch,
         icon: const Icon(Icons.add, color: Colors.white, size: 16),
@@ -265,162 +215,28 @@ class _FlockBatchScreenState extends ConsumerState<FlockBatchScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero, // End-to-end cards
       itemCount: mainFlockBatches.length,
       itemBuilder: (context, index) {
         final batch = mainFlockBatches[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _FlockBatchCard(
-            batch: batch,
-            index: index + 1,
-            onViewDetail: () => _showFlockBatchDetail(batch),
-            onEdit: () => _navigateToEditMainFlockBatch(batch),
-            onDelete: () => _deleteMainFlockBatch(batch.batchId),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Flock Batch Card Widget - Card-based design
-class _FlockBatchCard extends StatelessWidget {
-  final MainFlockBatch batch;
-  final int index;
-  final VoidCallback onViewDetail;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _FlockBatchCard({
-    required this.batch,
-    required this.index,
-    required this.onViewDetail,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with number and title
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$index',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    batch.batchName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      onEdit();
-                    } else if (value == 'delete') {
-                      onDelete();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Info items with icons
-            InfoItemWidget(
-              icon: Icons.qr_code_outlined,
-              label: 'Batch Code',
-              value: batch.batchCode,
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.category_outlined,
-              label: 'Breed',
-              value: batch.breed,
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.numbers_outlined,
-              label: 'Number of Birds',
-              value: '${batch.numberOfBirds}',
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.calendar_today_outlined,
+        return UnifiedListCardWidget(
+          id: 'BATCH-${batch.batchId}',
+          title: batch.batchName,
+          fields: [
+            CardField(label: 'Batch Code', value: batch.batchCode),
+            CardField(label: 'Breed', value: batch.breed),
+            CardField(label: 'Number of Birds', value: '${batch.numberOfBirds}'),
+            CardField(
               label: 'Start Date',
               value: batch.startDate.toLocal().toString().split(' ')[0],
             ),
-            const SizedBox(height: 16),
-            // Action button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onViewDetail,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
-                  foregroundColor: Colors.grey[800],
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('View Details'),
-              ),
-            ),
           ],
-        ),
-      ),
+          onEdit: () => _navigateToEditMainFlockBatch(batch),
+          onDelete: () => _deleteMainFlockBatch(batch.batchId),
+          onSend: () => _showFlockBatchDetail(batch),
+          sendButtonLabel: 'View Details',
+        );
+      },
     );
   }
 }

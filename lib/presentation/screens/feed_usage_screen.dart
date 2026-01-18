@@ -4,8 +4,9 @@ import '../../application/providers/feed_usage_providers.dart';
 import '../../domain/entities/feed_usage.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
-import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/unified_list_card_widget.dart';
+import '../widgets/ereceipt_detail_widget.dart';
 import 'add_edit_feed_usage_screen.dart';
 
 class FeedUsageScreen extends ConsumerStatefulWidget {
@@ -50,79 +51,31 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Feed Usage Details',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  InfoItemWidget(
-                    icon: Icons.inventory_outlined,
-                    label: 'Feed Type',
-                    value: feedUsage.feedType,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.pets_outlined,
-                    label: 'Flock ID',
-                    value: '${feedUsage.flockId}',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.scale_outlined,
-                    label: 'Quantity',
-                    value: '${feedUsage.quantityKg} Kg',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.calendar_today_outlined,
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: EReceiptDetailWidget(
+            title: 'Feed Usage Details',
+            sections: [
+              DetailSection(
+                type: DetailSectionType.infoList,
+                title: 'Feed Information',
+                items: [
+                  DetailItem(label: 'Feed Type', value: feedUsage.feedType),
+                  DetailItem(label: 'Flock ID', value: '${feedUsage.flockId}'),
+                  DetailItem(label: 'Quantity', value: '${feedUsage.quantityKg} Kg'),
+                  DetailItem(
                     label: 'Usage Date',
                     value: feedUsage.usageDate.toLocal().toString().split(' ')[0],
                   ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _navigateToEditFeedUsage(feedUsage);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Edit Feed Usage'),
-                    ),
-                  ),
                 ],
               ),
-            ),
+            ],
+            actionButtonLabel: 'Edit Feed Usage',
+            actionButtonColor: const Color(0xFF2563EB),
+            onActionPressed: () {
+              Navigator.of(context).pop();
+              _navigateToEditFeedUsage(feedUsage);
+            },
           ),
         );
       },
@@ -179,6 +132,7 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
       pageIcon: Icons.inventory,
       iconBackgroundColor: const Color(0xFFF0F9FF),
       searchController: _searchController,
+      showSearchInHeader: true,
       actionButton: ElevatedButton.icon(
         onPressed: _navigateToAddFeedUsage,
         icon: const Icon(Icons.add, color: Colors.white, size: 16),
@@ -248,156 +202,27 @@ class _FeedUsageScreenState extends ConsumerState<FeedUsageScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero, // End-to-end cards
       itemCount: feedUsages.length,
       itemBuilder: (context, index) {
         final usage = feedUsages[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _FeedUsageCard(
-            usage: usage,
-            index: index + 1,
-            onViewDetail: () => _showFeedUsageDetail(usage),
-            onEdit: () => _navigateToEditFeedUsage(usage),
-            onDelete: () => _deleteFeedUsage(usage.feedUsageId),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Feed Usage Card Widget - Card-based design
-class _FeedUsageCard extends StatelessWidget {
-  final FeedUsage usage;
-  final int index;
-  final VoidCallback onViewDetail;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _FeedUsageCard({
-    required this.usage,
-    required this.index,
-    required this.onViewDetail,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with number and title
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$index',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    usage.feedType,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      onEdit();
-                    } else if (value == 'delete') {
-                      onDelete();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Info items with icons
-            InfoItemWidget(
-              icon: Icons.pets_outlined,
-              label: 'Flock',
-              value: 'Flock ${usage.flockId}',
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.scale_outlined,
-              label: 'Quantity',
-              value: '${usage.quantityKg} Kg',
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.calendar_today_outlined,
+        return UnifiedListCardWidget(
+          id: 'FEED-${usage.feedUsageId}',
+          title: usage.feedType,
+          fields: [
+            CardField(label: 'Flock', value: 'Flock ${usage.flockId}'),
+            CardField(label: 'Quantity', value: '${usage.quantityKg} Kg'),
+            CardField(
               label: 'Date',
               value: usage.usageDate.toLocal().toString().split(' ')[0],
             ),
-            const SizedBox(height: 16),
-            // Action button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onViewDetail,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
-                  foregroundColor: Colors.grey[800],
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('View Details'),
-              ),
-            ),
           ],
-        ),
-      ),
+          onEdit: () => _navigateToEditFeedUsage(usage),
+          onDelete: () => _deleteFeedUsage(usage.feedUsageId),
+          onSend: () => _showFeedUsageDetail(usage),
+          sendButtonLabel: 'View Details',
+        );
+      },
     );
   }
 }

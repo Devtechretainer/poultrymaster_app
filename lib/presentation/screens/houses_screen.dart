@@ -4,8 +4,9 @@ import '../../application/providers/house_providers.dart';
 import '../../domain/entities/house.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
-import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/unified_list_card_widget.dart';
+import '../widgets/ereceipt_detail_widget.dart';
 import 'add_edit_house_screen.dart';
 
 class HousesScreen extends ConsumerStatefulWidget {
@@ -50,73 +51,27 @@ class _HousesScreenState extends ConsumerState<HousesScreen> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'House Details',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  InfoItemWidget(
-                    icon: Icons.home_outlined,
-                    label: 'House Name',
-                    value: house.houseName,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.numbers_outlined,
-                    label: 'Capacity',
-                    value: '${house.capacity}',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.location_on_outlined,
-                    label: 'Location',
-                    value: house.location,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _navigateToEditHouse(house);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Edit House'),
-                    ),
-                  ),
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: EReceiptDetailWidget(
+            title: 'House Details',
+            sections: [
+              DetailSection(
+                type: DetailSectionType.infoList,
+                title: 'House Information',
+                items: [
+                  DetailItem(label: 'House Name', value: house.houseName),
+                  DetailItem(label: 'Capacity', value: '${house.capacity}'),
+                  DetailItem(label: 'Location', value: house.location),
                 ],
               ),
-            ),
+            ],
+            actionButtonLabel: 'Edit House',
+            actionButtonColor: const Color(0xFF2563EB),
+            onActionPressed: () {
+              Navigator.of(context).pop();
+              _navigateToEditHouse(house);
+            },
           ),
         );
       },
@@ -169,6 +124,7 @@ class _HousesScreenState extends ConsumerState<HousesScreen> {
       pageIcon: Icons.home_work,
       iconBackgroundColor: const Color(0xFFECFDF5),
       searchController: _searchController,
+      showSearchInHeader: true,
       actionButton: ElevatedButton.icon(
         onPressed: _navigateToAddHouse,
         icon: const Icon(Icons.add, color: Colors.white, size: 16),
@@ -231,82 +187,24 @@ class _HousesScreenState extends ConsumerState<HousesScreen> {
       );
     }
 
-    return Card(
-      child: ListView.builder(
-        itemCount: houses.length,
-        itemBuilder: (context, index) {
-          final house = houses[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.teal,
-              child: Text(
-                house.houseName.isNotEmpty ? house.houseName[0].toUpperCase() : 'H',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-            title: Text(
-              'House Name: ${house.houseName}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Capacity: ${house.capacity}'),
-                Text('Location: ${house.location}'),
-              ],
-            ),
-            trailing: PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'view') {
-                  _showHouseDetail(house);
-                } else if (value == 'edit') {
-                  _navigateToEditHouse(house);
-                } else if (value == 'delete') {
-                  _deleteHouse(house.houseId);
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'view',
-                  child: Row(
-                    children: [
-                      Icon(Icons.visibility, size: 18),
-                      SizedBox(width: 8),
-                      Text('View Details'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, size: 18),
-                      SizedBox(width: 8),
-                      Text('Edit'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, size: 18, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            onTap: () {
-              _showHouseDetail(house);
-            },
-          );
-        },
-      ),
+    return ListView.builder(
+      padding: EdgeInsets.zero, // End-to-end cards
+      itemCount: houses.length,
+      itemBuilder: (context, index) {
+        final house = houses[index];
+        return UnifiedListCardWidget(
+          id: 'HOUSE-${house.houseId}',
+          title: house.houseName,
+          fields: [
+            CardField(label: 'Capacity', value: '${house.capacity}'),
+            CardField(label: 'Location', value: house.location),
+          ],
+          onEdit: () => _navigateToEditHouse(house),
+          onDelete: () => _deleteHouse(house.houseId),
+          onSend: () => _showHouseDetail(house),
+          sendButtonLabel: 'View Details',
+        );
+      },
     );
   }
 }

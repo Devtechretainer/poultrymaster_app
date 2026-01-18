@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/egg_production_providers.dart';
 import '../../domain/entities/egg_production.dart';
@@ -95,9 +96,11 @@ class _AddEditEggProductionScreenState
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _selectedProductionDate) {
-      setState(() {
-        _selectedProductionDate = picked;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedProductionDate = picked;
+        });
+      }
     }
   }
 
@@ -207,199 +210,385 @@ class _AddEditEggProductionScreenState
       final selected = flocks.firstWhereOrNull(
           (flock) => flock.flockId == widget.eggProduction!.flockId);
       if (selected != null) {
-        Future.microtask(() => setState(() => _selectedFlock = selected));
+        Future.microtask(() {
+          if (mounted) {
+            setState(() => _selectedFlock = selected);
+          }
+        });
       }
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F5F9), // bg-slate-100
       appBar: AppBar(
-        title: Text(title),
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.grey[900], size: 24.sp),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[900],
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: Container(
-        color: Colors.grey[100],
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomDropdownButtonFormField<Flock>(
-                          value: _selectedFlock,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Flock *',
+                // Flock dropdown
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Flock *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    CustomDropdownButtonFormField<Flock>(
+                      value: _selectedFlock,
+                      decoration: InputTheme.dropdownDecoration(
+                        label: '',
+                      ).copyWith(
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      items: flocksLoading
+                          ? []
+                          : flocks.map((Flock flock) {
+                              return DropdownMenuItem<Flock>(
+                                value: flock,
+                                child: Text(flock.name),
+                              );
+                            }).toList(),
+                      onChanged: flocksLoading
+                          ? null
+                          : (Flock? newValue) {
+                              setState(() {
+                                _selectedFlock = newValue;
+                              });
+                            },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please select a flock';
+                        }
+                        return null;
+                      },
+                      isLoading: flocksLoading,
+                      loadingMessage: 'Loading flocks...',
+                      emptyMessage: flockState.error != null
+                          ? 'Error: ${flockState.error}'
+                          : 'No flocks found. Please add a flock first.',
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Production Date
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Production Date *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    GestureDetector(
+                        onTap: () => _selectProductionDate(context),
+                        child: AbsorbPointer(
+                          child: TextFormField(
+                            controller: TextEditingController(
+                              text: _selectedProductionDate == null
+                                  ? ''
+                                  : '${_selectedProductionDate!.toLocal()}'
+                                      .split(' ')[0],
+                            ),
+                            style: TextStyle(fontSize: 14.sp),
+                            decoration: InputTheme.dateDecoration(
+                              label: '',
+                              hint: 'DD/MM/YYYY',
+                            ).copyWith(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 14.h,
+                              ),
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
+                            ),
+                            validator: (value) {
+                              if (_selectedProductionDate == null) {
+                                return 'Production Date is required';
+                              }
+                              return null;
+                            },
                           ),
-                          items: flocksLoading
-                              ? []
-                              : flocks.map((Flock flock) {
-                                  return DropdownMenuItem<Flock>(
-                                    value: flock,
-                                    child: Text(flock.name),
-                                  );
-                                }).toList(),
-                          onChanged: flocksLoading
-                              ? null
-                              : (Flock? newValue) {
-                                  setState(() {
-                                    _selectedFlock = newValue;
-                                  });
-                                },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a flock';
-                            }
-                            return null;
-                          },
-                          isLoading: flocksLoading,
-                          loadingMessage: 'Loading flocks...',
-                          emptyMessage: flockState.error != null
-                              ? 'Error: ${flockState.error}'
-                              : 'No flocks found. Please add a flock first.',
                         ),
-                        const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () => _selectProductionDate(context),
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              controller: TextEditingController(
-                                text: _selectedProductionDate == null
-                                    ? ''
-                                    : '${_selectedProductionDate!.toLocal()}'
-                                        .split(' ')[0],
-                              ),
-                              decoration: InputTheme.dateDecoration(
-                                label: 'Production Date *',
-                                hint: 'DD/MM/YYYY',
-                              ),
-                              validator: (value) {
-                                if (_selectedProductionDate == null) {
-                                  return 'Production Date is required';
-                                }
-                                return null;
-                              },
+                      ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Egg Count (read-only)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Egg Count *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _eggCountController,
+                      readOnly: true,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Calculated automatically',
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Notes
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Notes (Optional)',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _notesController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.textAreaDecoration(
+                        label: '',
+                        hint: 'Enter notes...',
+                      ).copyWith(
+                        contentPadding: EdgeInsets.all(12.w),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // 9 AM Production
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Production 9 AM *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _production9AMController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Enter number',
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Production 9 AM is required';
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // 12 PM Production
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Production 12 PM *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _production12PMController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Enter number',
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Production 12 PM is required';
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // 4 PM Production
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Production 4 PM *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _production4PMController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Enter number',
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Production 4 PM is required';
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Broken Eggs
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Broken Eggs *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _brokenEggsController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Enter number',
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Broken Eggs is required';
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Submit button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF14B8A6), // Teal-green
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isLoading
+                        ? const LoadingWidget.small()
+                        : Text(
+                            _isEditMode
+                                ? 'Update Production'
+                                : 'Save Production',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _eggCountController,
-                          readOnly: true,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Egg Count *',
-                            hint: 'Calculated automatically',
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _production9AMController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Production 9 AM *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Production 9 AM is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _production12PMController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Production 12 PM *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Production 12 PM is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _production4PMController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Production 4 PM *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Production 4 PM is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _brokenEggsController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Broken Eggs *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Broken Eggs is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _notesController,
-                          decoration: InputTheme.textAreaDecoration(
-                            label: 'Notes (Optional)',
-                            hint: 'Enter notes...',
-                          ),
-                          maxLines: 3,
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: isLoading ? null : _submitForm,
-                            style: FormButtonStyle.primary(),
-                            child: isLoading
-                                ? const SizedBox(
-                                    child: LoadingWidget.small(),
-                                  )
-                                : const Text(
-                                    'Save Record',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  ),
                 ),
+                SizedBox(height: 24.h),
               ],
             ),
           ),

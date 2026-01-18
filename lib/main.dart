@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/config/app_config.dart';
 import 'presentation/screens/login_screen.dart';
 
@@ -20,10 +21,17 @@ class PoultryCoreApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Poultry Core',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+    return ScreenUtilInit(
+      // Design size - adjust based on your design specs
+      // Common sizes: iPhone 14 Pro Max (430x932), or use a standard like 375x812
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Poultry Core',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
         fontFamily: 'Poppins',
@@ -97,6 +105,8 @@ class PoultryCoreApp extends StatelessWidget {
         ),
       ),
       home: const LoginScreen(),
+        );
+      },
     );
   }
 }

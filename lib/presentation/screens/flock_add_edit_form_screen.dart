@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:collection/collection.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/flock_providers.dart';
@@ -75,33 +76,39 @@ class _FlockAddEditFormScreenState
     }
 
     if (_selectedStartDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Start Date is required.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Start Date is required.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
     if (_selectedFlockBatch == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a Flock Batch.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a Flock Batch.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
     if (int.parse(_quantityController.text.trim()) >
         _selectedFlockBatch!.numberOfBirds) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Quantity cannot be greater than available birds in the selected batch.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Quantity cannot be greater than available birds in the selected batch.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
@@ -111,12 +118,14 @@ class _FlockAddEditFormScreenState
     final farmId = user?.farmId ?? user?.id ?? '';
 
     if (userId.isEmpty || farmId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('User information not found. Please login again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('User information not found. Please login again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
     final flockRequest = FlockRequest(
@@ -182,7 +191,11 @@ class _FlockAddEditFormScreenState
       final selected = flockBatches
           .firstWhereOrNull((batch) => batch.batchId == widget.flock!.batchId);
       if (selected != null) {
-        Future.microtask(() => setState(() => _selectedFlockBatch = selected));
+        Future.microtask(() {
+          if (mounted) {
+            setState(() => _selectedFlockBatch = selected);
+          }
+        });
       }
     }
 
@@ -190,7 +203,11 @@ class _FlockAddEditFormScreenState
       final selected = houses
           .firstWhereOrNull((house) => house.houseId == widget.flock!.houseId);
       if (selected != null) {
-        Future.microtask(() => setState(() => _selectedHouse = selected));
+        Future.microtask(() {
+          if (mounted) {
+            setState(() => _selectedHouse = selected);
+          }
+        });
       }
     }
 
@@ -214,87 +231,173 @@ class _FlockAddEditFormScreenState
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Flock Name *',
-                            hint: 'Enter flock name',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Flock name is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _breedController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Breed *',
-                            hint: 'Enter breed',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Breed is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _quantityController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Quantity *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Quantity is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () async {
-                            final DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: _selectedStartDate ?? DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2101),
-                            );
-                            if (picked != null &&
-                                picked != _selectedStartDate) {
-                              setState(() {
-                                _selectedStartDate = picked;
-                              });
-                            }
-                          },
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              controller: TextEditingController(
-                                text: _selectedStartDate == null
-                                    ? ''
-                                    : '${_selectedStartDate!.toLocal()}'
-                                        .split(' ')[0],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Flock Name *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
                               ),
-                              decoration: InputTheme.dateDecoration(
-                                label: 'Start Date *',
-                                hint: 'DD/MM/YYYY',
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _nameController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter flock name',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
                               ),
                               validator: (value) {
-                                if (_selectedStartDate == null) {
-                                  return 'Start Date is required';
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Flock name is required';
                                 }
                                 return null;
                               },
                             ),
-                          ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Breed *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _breedController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter breed',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Breed is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Quantity *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _quantityController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Quantity is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Start Date *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            GestureDetector(
+                              onTap: () async {
+                                final DateTime? picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: _selectedStartDate ?? DateTime.now(),
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2101),
+                                );
+                                if (picked != null &&
+                                    picked != _selectedStartDate) {
+                                  if (mounted) {
+                                    setState(() {
+                                      _selectedStartDate = picked;
+                                    });
+                                  }
+                                }
+                              },
+                              child: AbsorbPointer(
+                                child: TextFormField(
+                                  controller: TextEditingController(
+                                    text: _selectedStartDate == null
+                                        ? ''
+                                        : '${_selectedStartDate!.toLocal()}'
+                                            .split(' ')[0],
+                                  ),
+                                  style: TextStyle(fontSize: 14.sp),
+                                  decoration: InputTheme.dateDecoration(
+                                    label: '',
+                                    hint: 'DD/MM/YYYY',
+                                  ).copyWith(
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 14.h,
+                                    ),
+                                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                                  ),
+                                  validator: (value) {
+                                    if (_selectedStartDate == null) {
+                                      return 'Start Date is required';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         Row(
@@ -315,12 +418,30 @@ class _FlockAddEditFormScreenState
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        CustomDropdownButtonFormField<House>(
-                          value: _selectedHouse,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Assign to House',
-                          ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Assign to House',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            CustomDropdownButtonFormField<House>(
+                              value: _selectedHouse,
+                              decoration: InputTheme.dropdownDecoration(
+                                label: '',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
                           items: housesLoading
                               ? []
                               : houses.map((House house) {
@@ -344,13 +465,33 @@ class _FlockAddEditFormScreenState
                           emptyMessage: houseState.error != null
                               ? 'Error: ${houseState.error}'
                               : 'No houses found',
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        CustomDropdownButtonFormField<MainFlockBatch>(
-                          value: _selectedFlockBatch,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Assign to Flock Batch *',
-                          ),
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Assign to Flock Batch *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            CustomDropdownButtonFormField<MainFlockBatch>(
+                              value: _selectedFlockBatch,
+                              decoration: InputTheme.dropdownDecoration(
+                                label: '',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
                           items: flockBatchesLoading
                               ? []
                               : flockBatches.map((MainFlockBatch batch) {
@@ -377,45 +518,111 @@ class _FlockAddEditFormScreenState
                           emptyMessage: mainFlockBatchState.error != null
                               ? 'Error: ${mainFlockBatchState.error}'
                               : 'No flock batches found',
+                            ),
+                            if (_selectedFlockBatch != null)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 8.0, left: 12.0),
+                                child: Text(
+                                  'Available in Batch: ${_selectedFlockBatch!.numberOfBirds} birds',
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                              ),
+                          ],
                         ),
-                        if (_selectedFlockBatch != null)
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(top: 8.0, left: 12.0),
-                            child: Text(
-                              'Available in Batch: ${_selectedFlockBatch!.numberOfBirds} birds',
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey),
-                            ),
-                          ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 12.h),
                         if (_showInactivationFields) ...[
-                          TextFormField(
-                            controller: _inactivationReasonController,
-                            decoration: InputTheme.textAreaDecoration(
-                              label: 'Inactivation Reason (Optional)',
-                              hint: 'Enter reason...',
-                            ),
-                            maxLines: 3,
+                          SizedBox(height: 12.h),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Inactivation Reason (Optional)',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              TextFormField(
+                                controller: _inactivationReasonController,
+                                style: TextStyle(fontSize: 14.sp),
+                                decoration: InputTheme.textAreaDecoration(
+                                  label: '',
+                                  hint: 'Enter reason...',
+                                ).copyWith(
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                    vertical: 14.h,
+                                  ),
+                                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                                ),
+                                maxLines: 3,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _otherReasonController,
-                            decoration: InputTheme.textAreaDecoration(
-                              label: 'Other Reason (Optional)',
-                              hint: 'Enter reason...',
-                            ),
-                            maxLines: 3,
+                          SizedBox(height: 12.h),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Other Reason (Optional)',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              TextFormField(
+                                controller: _otherReasonController,
+                                style: TextStyle(fontSize: 14.sp),
+                                decoration: InputTheme.textAreaDecoration(
+                                  label: '',
+                                  hint: 'Enter reason...',
+                                ).copyWith(
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                    vertical: 14.h,
+                                  ),
+                                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                                ),
+                                maxLines: 3,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 16),
                         ],
-                        TextFormField(
-                          controller: _notesController,
-                          decoration: InputTheme.textAreaDecoration(
-                            label: 'Notes (Optional)',
-                            hint: 'Enter notes...',
-                          ),
-                          maxLines: 3,
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Notes (Optional)',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _notesController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.textAreaDecoration(
+                                label: '',
+                                hint: 'Enter notes...',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              maxLines: 3,
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 24),
                         SizedBox(

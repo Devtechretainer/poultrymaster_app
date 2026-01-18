@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/production_record_providers.dart';
+import '../../application/providers/egg_production_providers.dart';
 import '../../domain/entities/production_record.dart';
+import '../../domain/entities/egg_production.dart';
 import '../widgets/base_page_screen.dart';
 import '../widgets/empty_state_widget.dart';
-import '../widgets/info_item_widget.dart';
 import '../widgets/loading_widget.dart';
+import '../widgets/unified_list_card_widget.dart';
+import '../widgets/ereceipt_detail_widget.dart';
+import '../widgets/asset_image_widget.dart';
 import 'add_edit_production_record_screen.dart';
+import 'add_edit_egg_production_screen.dart';
 
 class ProductionRecordsScreen extends ConsumerStatefulWidget {
   final Function(String) onNavigate;
@@ -34,7 +39,146 @@ class _ProductionRecordsScreenState
       ref
           .read(productionRecordControllerProvider.notifier)
           .loadProductionRecords();
+      ref
+          .read(eggProductionControllerProvider.notifier)
+          .loadEggProductions();
     });
+  }
+
+  void _showEggProductionDetail(EggProduction eggProduction) {
+    final dateTime = eggProduction.productionDate.toLocal();
+    final dateStr = dateTime.toString().split(' ')[0];
+    final timeStr =
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')} ${dateTime.hour >= 12 ? 'PM' : 'AM'}';
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EReceiptDetailWidget(
+          title: 'Production Details',
+          sections: [
+            // Item Card Section
+            DetailSection(
+              type: DetailSectionType.itemCard,
+              title: 'Flock ${eggProduction.flockId}',
+              subtitle:
+                  'Egg Production | Total: ${eggProduction.totalProduction} eggs',
+              footer: 'Production Date: $dateStr',
+              imageWidget: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: AssetImageWidget(
+                  assetPath: 'assets/icons/egg.png',
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            // Production Information Section
+            DetailSection(
+              type: DetailSectionType.infoList,
+              title: 'Production Information',
+              items: [
+                DetailItem(
+                  label: 'Production ID',
+                  value: 'EGG-${eggProduction.productionId}',
+                ),
+                DetailItem(
+                  label: 'Flock ID',
+                  value: '${eggProduction.flockId}',
+                ),
+                DetailItem(
+                  label: 'Production Date',
+                  value: '$dateStr | $timeStr',
+                ),
+                if (eggProduction.notes != null &&
+                    eggProduction.notes!.isNotEmpty)
+                  DetailItem(label: 'Notes', value: eggProduction.notes!),
+              ],
+            ),
+            // Production Summary Section
+            DetailSection(
+              type: DetailSectionType.summary,
+              title: 'Production Summary',
+              items: [
+                DetailItem(
+                  label: 'Total Production',
+                  value: '${eggProduction.totalProduction} eggs',
+                ),
+                DetailItem(
+                  label: '9 AM Production',
+                  value: '+ ${eggProduction.production9AM} eggs',
+                ),
+                DetailItem(
+                  label: '12 PM Production',
+                  value: '+ ${eggProduction.production12PM} eggs',
+                ),
+                DetailItem(
+                  label: '4 PM Production',
+                  value: '+ ${eggProduction.production4PM} eggs',
+                ),
+                DetailItem(
+                  label: 'Broken Eggs',
+                  value: '- ${eggProduction.brokenEggs}',
+                ),
+                DetailItem(
+                  label: 'Egg Count',
+                  value: '${eggProduction.eggCount}',
+                ),
+              ],
+            ),
+          ],
+          actionButtonLabel: 'Edit Egg Production',
+          actionButtonColor: const Color(0xFF2563EB),
+          onActionPressed: () {
+            Navigator.of(context).pop();
+            _navigateToEditEggProduction(eggProduction);
+          },
+        ),
+      ),
+    );
+  }
+
+  void _navigateToEditEggProduction(EggProduction eggProduction) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            AddEditEggProductionScreen(eggProduction: eggProduction),
+      ),
+    );
+  }
+
+  Future<void> _deleteEggProduction(int id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Deletion'),
+        content: const Text(
+          'Are you sure you want to delete this egg production record?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref
+          .read(eggProductionControllerProvider.notifier)
+          .deleteEggProduction(id);
+    }
   }
 
   @override
@@ -50,142 +194,120 @@ class _ProductionRecordsScreenState
   }
 
   void _showProductionRecordDetail(ProductionRecord productionRecord) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Production Record Details',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  InfoItemWidget(
-                    icon: Icons.pets_outlined,
-                    label: 'Flock ID',
-                    value: '${productionRecord.flockId}',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.calendar_today_outlined,
-                    label: 'Date',
-                    value: productionRecord.date.toLocal().toString().split(' ')[0],
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.numbers_outlined,
-                    label: 'Age in Weeks',
-                    value: '${productionRecord.ageInWeeks} weeks',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.numbers_outlined,
-                    label: 'Age in Days',
-                    value: '${productionRecord.ageInDays} days',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.group_outlined,
-                    label: 'Number of Birds',
-                    value: '${productionRecord.noOfBirds}',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.warning_outlined,
-                    label: 'Mortality',
-                    value: '${productionRecord.mortality} birds',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.group_outlined,
-                    label: 'Birds Left',
-                    value: '${productionRecord.noOfBirdsLeft}',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.inventory_2_outlined,
-                    label: 'Feed',
-                    value: '${productionRecord.feedKg} Kg',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.egg_outlined,
-                    label: 'Total Production',
-                    value: '${productionRecord.totalProduction} eggs',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.access_time_outlined,
-                    label: '9 AM Production',
-                    value: '${productionRecord.production9AM} eggs',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.access_time_outlined,
-                    label: '12 PM Production',
-                    value: '${productionRecord.production12PM} eggs',
-                  ),
-                  const SizedBox(height: 16),
-                  InfoItemWidget(
-                    icon: Icons.access_time_outlined,
-                    label: '4 PM Production',
-                    value: '${productionRecord.production4PM} eggs',
-                  ),
-                  if (productionRecord.medication != null && productionRecord.medication!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.medical_services_outlined,
-                      label: 'Medication',
-                      value: productionRecord.medication!,
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _navigateToEditProductionRecord(productionRecord);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Edit Production Record'),
-                    ),
-                  ),
-                ],
+    final dateTime = productionRecord.date.toLocal();
+    final dateStr = dateTime.toString().split(' ')[0];
+    final timeStr =
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')} ${dateTime.hour >= 12 ? 'PM' : 'AM'}';
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EReceiptDetailWidget(
+          title: 'Production Details',
+          sections: [
+            // Item Card Section
+            DetailSection(
+              type: DetailSectionType.itemCard,
+              title: 'Flock ${productionRecord.flockId}',
+              subtitle:
+                  'Production Record | Total: ${productionRecord.totalProduction} eggs',
+              footer: 'Production Date: $dateStr',
+              imageWidget: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: AssetImageWidget(
+                  assetPath: 'assets/icons/egg.png',
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-          ),
-        );
-      },
+            // Production Information Section
+            DetailSection(
+              type: DetailSectionType.infoList,
+              title: 'Production Information',
+              items: [
+                DetailItem(
+                  label: 'Record ID',
+                  value: 'PROD-${productionRecord.id}',
+                ),
+                DetailItem(
+                  label: 'Flock ID',
+                  value: '${productionRecord.flockId}',
+                ),
+                DetailItem(
+                  label: 'Production Date',
+                  value: '$dateStr | $timeStr',
+                ),
+                DetailItem(
+                  label: 'Age in Weeks',
+                  value: '${productionRecord.ageInWeeks} weeks',
+                ),
+                DetailItem(
+                  label: 'Age in Days',
+                  value: '${productionRecord.ageInDays} days',
+                ),
+                DetailItem(
+                  label: 'Number of Birds',
+                  value: '${productionRecord.noOfBirds} birds',
+                ),
+                DetailItem(
+                  label: 'Birds Left',
+                  value: '${productionRecord.noOfBirdsLeft} birds',
+                ),
+                DetailItem(
+                  label: 'Mortality',
+                  value: '${productionRecord.mortality} birds',
+                ),
+                DetailItem(
+                  label: 'Feed',
+                  value: '${productionRecord.feedKg} Kg',
+                ),
+                if (productionRecord.medication != null &&
+                    productionRecord.medication!.isNotEmpty)
+                  DetailItem(
+                    label: 'Medication',
+                    value: productionRecord.medication!,
+                  ),
+              ],
+            ),
+            // Production Summary Section
+            DetailSection(
+              type: DetailSectionType.summary,
+              title: 'Production Summary',
+              items: [
+                DetailItem(
+                  label: 'Total Production',
+                  value: '${productionRecord.totalProduction} eggs',
+                ),
+                DetailItem(
+                  label: '9 AM Production',
+                  value: '+ ${productionRecord.production9AM} eggs',
+                ),
+                DetailItem(
+                  label: '12 PM Production',
+                  value: '+ ${productionRecord.production12PM} eggs',
+                ),
+                DetailItem(
+                  label: '4 PM Production',
+                  value: '+ ${productionRecord.production4PM} eggs',
+                ),
+              ],
+            ),
+          ],
+          actionButtonLabel: 'Edit Production Record',
+          actionButtonColor: const Color(0xFF2563EB),
+          onActionPressed: () {
+            Navigator.of(context).pop();
+            _navigateToEditProductionRecord(productionRecord);
+          },
+        ),
+      ),
     );
   }
 
@@ -229,9 +351,11 @@ class _ProductionRecordsScreenState
   @override
   Widget build(BuildContext context) {
     final productionRecordState = ref.watch(productionRecordControllerProvider);
+    final eggProductionState = ref.watch(eggProductionControllerProvider);
     final productionRecords = productionRecordState.productionRecords;
-    final isLoading = productionRecordState.isLoading;
-    final error = productionRecordState.error;
+    final eggProductions = eggProductionState.eggProductions;
+    final isLoading = productionRecordState.isLoading || eggProductionState.isLoading;
+    final error = productionRecordState.error ?? eggProductionState.error;
 
     return BasePageScreen(
       currentRoute: '/production-records',
@@ -242,6 +366,7 @@ class _ProductionRecordsScreenState
       pageIcon: Icons.description,
       iconBackgroundColor: const Color(0xFFFEF3C7),
       searchController: _searchController,
+      showSearchInHeader: true,
       actionButton: ElevatedButton.icon(
         onPressed: _navigateToAddProductionRecord,
         icon: const Icon(Icons.add, color: Colors.white, size: 16),
@@ -255,12 +380,13 @@ class _ProductionRecordsScreenState
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
-      child: _buildContent(productionRecords, isLoading, error),
+      child: _buildContent(productionRecords, eggProductions, isLoading, error),
     );
   }
 
   Widget _buildContent(
     List<ProductionRecord> productionRecords,
+    List<EggProduction> eggProductions,
     bool isLoading,
     String? error,
   ) {
@@ -289,6 +415,9 @@ class _ProductionRecordsScreenState
                   ref
                       .read(productionRecordControllerProvider.notifier)
                       .loadProductionRecords();
+                  ref
+                      .read(eggProductionControllerProvider.notifier)
+                      .loadEggProductions();
                 },
                 child: const Text('Retry'),
               ),
@@ -298,7 +427,7 @@ class _ProductionRecordsScreenState
       );
     }
 
-    if (productionRecords.isEmpty) {
+    if (productionRecords.isEmpty && eggProductions.isEmpty) {
       return EmptyStateWidget(
         icon: Icons.description,
         title: 'No production records found',
@@ -308,169 +437,105 @@ class _ProductionRecordsScreenState
       );
     }
 
+    // Combine both lists - Production Records first, then Egg Productions
+    // Sort by date descending (most recent first)
+    final allRecords = <_ProductionItem>[];
+    
+    // Add production records
+    for (var record in productionRecords) {
+      allRecords.add(_ProductionItem(
+        type: _ProductionType.productionRecord,
+        productionRecord: record,
+        date: record.date,
+      ));
+    }
+    
+    // Add egg productions
+    for (var egg in eggProductions) {
+      allRecords.add(_ProductionItem(
+        type: _ProductionType.eggProduction,
+        eggProduction: egg,
+        date: egg.productionDate,
+      ));
+    }
+    
+    // Sort by date (most recent first)
+    allRecords.sort((a, b) => b.date.compareTo(a.date));
+
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: productionRecords.length,
+      padding: EdgeInsets.zero, // End-to-end cards
+      itemCount: allRecords.length,
       itemBuilder: (context, index) {
-        final record = productionRecords[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _ProductionRecordCard(
-            record: record,
-            index: index + 1,
-            onViewDetail: () => _showProductionRecordDetail(record),
+        final item = allRecords[index];
+        
+        if (item.type == _ProductionType.productionRecord) {
+          final record = item.productionRecord!;
+          return UnifiedListCardWidget(
+            id: 'PROD-${record.id}',
+            title: 'Flock ${record.flockId}',
+            fields: [
+              CardField(
+                label: 'Date',
+                value: record.date.toLocal().toString().split(' ')[0],
+              ),
+              CardField(label: 'Production', value: '${record.totalProduction} eggs'),
+              CardField(label: 'Mortality', value: '${record.mortality} birds'),
+              CardField(label: 'Feed', value: '${record.feedKg} Kg'),
+              CardField(label: 'Birds Left', value: '${record.noOfBirdsLeft}'),
+            ],
             onEdit: () => _navigateToEditProductionRecord(record),
             onDelete: () => _deleteProductionRecord(record.id),
-          ),
-        );
+            onSend: () => _showProductionRecordDetail(record),
+            sendButtonLabel: 'View Details',
+          );
+        } else {
+          final egg = item.eggProduction!;
+          final fields = <CardField>[
+            CardField(
+              label: 'Date',
+              value: egg.productionDate.toLocal().toString().split(' ')[0],
+            ),
+            CardField(
+              label: 'Total Production',
+              value: '${egg.totalProduction} eggs',
+            ),
+            CardField(label: 'Broken Eggs', value: '${egg.brokenEggs}'),
+          ];
+          if (egg.notes != null && egg.notes!.isNotEmpty) {
+            fields.add(CardField(label: 'Notes', value: egg.notes!));
+          }
+
+          return UnifiedListCardWidget(
+            id: 'EGG-${egg.productionId}',
+            title: 'Flock ${egg.flockId}',
+            fields: fields,
+            onEdit: () => _navigateToEditEggProduction(egg),
+            onDelete: () => _deleteEggProduction(egg.productionId),
+            onSend: () => _showEggProductionDetail(egg),
+            sendButtonLabel: 'View Details',
+          );
+        }
       },
     );
   }
 }
 
-/// Production Record Card Widget - Card-based design
-class _ProductionRecordCard extends StatelessWidget {
-  final ProductionRecord record;
-  final int index;
-  final VoidCallback onViewDetail;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+// Helper class to combine both types of production records
+enum _ProductionType {
+  productionRecord,
+  eggProduction,
+}
 
-  const _ProductionRecordCard({
-    required this.record,
-    required this.index,
-    required this.onViewDetail,
-    required this.onEdit,
-    required this.onDelete,
+class _ProductionItem {
+  final _ProductionType type;
+  final ProductionRecord? productionRecord;
+  final EggProduction? eggProduction;
+  final DateTime date;
+
+  _ProductionItem({
+    required this.type,
+    this.productionRecord,
+    this.eggProduction,
+    required this.date,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with number and title
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$index',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Flock ${record.flockId}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      onEdit();
-                    } else if (value == 'delete') {
-                      onDelete();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Info items with icons
-            InfoItemWidget(
-              icon: Icons.calendar_today_outlined,
-              label: 'Date',
-              value: record.date.toLocal().toString().split(' ')[0],
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.egg_outlined,
-              label: 'Production',
-              value: '${record.totalProduction} eggs',
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.pets_outlined,
-              label: 'Mortality',
-              value: '${record.mortality} birds',
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.inventory_2_outlined,
-              label: 'Feed',
-              value: '${record.feedKg} Kg',
-            ),
-            const SizedBox(height: 12),
-            InfoItemWidget(
-              icon: Icons.numbers_outlined,
-              label: 'Birds Left',
-              value: '${record.noOfBirdsLeft}',
-            ),
-            const SizedBox(height: 16),
-            // Action button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onViewDetail,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
-                  foregroundColor: Colors.grey[800],
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('View Details'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

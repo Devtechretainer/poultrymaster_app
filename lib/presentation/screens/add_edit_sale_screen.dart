@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/sale_providers.dart';
 import '../../domain/entities/sale.dart';
@@ -86,9 +87,11 @@ class _AddEditSaleScreenState extends ConsumerState<AddEditSaleScreen> {
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != _selectedSaleDate) {
-      setState(() {
-        _selectedSaleDate = picked;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedSaleDate = picked;
+        });
+      }
     }
   }
 
@@ -215,7 +218,11 @@ class _AddEditSaleScreenState extends ConsumerState<AddEditSaleScreen> {
         (flock) => flock.flockId == widget.sale!.flockId,
       );
       if (selected != null) {
-        Future.microtask(() => setState(() => _selectedFlock = selected));
+        Future.microtask(() {
+          if (mounted) {
+            setState(() => _selectedFlock = selected);
+          }
+        });
       }
     }
 
@@ -224,235 +231,440 @@ class _AddEditSaleScreenState extends ConsumerState<AddEditSaleScreen> {
         (customer) => customer.name == widget.sale!.customerName,
       );
       if (selected != null) {
-        Future.microtask(() => setState(() => _selectedCustomer = selected));
+        Future.microtask(() {
+          if (mounted) {
+            setState(() => _selectedCustomer = selected);
+          }
+        });
       }
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F5F9), // bg-slate-100
       appBar: AppBar(
-        title: Text(title),
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.grey[900], size: 24.sp),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[900],
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: Container(
-        color: Colors.grey[100],
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomDropdownButtonFormField<Flock>(
-                          value: _selectedFlock,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Flock *',
+                // Flock dropdown
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Flock *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    CustomDropdownButtonFormField<Flock>(
+                      value: _selectedFlock,
+                      decoration: InputTheme.dropdownDecoration(label: '')
+                          .copyWith(
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
                           ),
-                          items: flocksLoading
-                              ? []
-                              : flocks.map((Flock flock) {
-                                  return DropdownMenuItem<Flock>(
-                                    value: flock,
-                                    child: Text(flock.name),
-                                  );
-                                }).toList(),
-                          onChanged: flocksLoading
-                              ? null
-                              : (Flock? newValue) {
-                                  setState(() {
-                                    _selectedFlock = newValue;
-                                  });
-                                },
+                      items: flocksLoading
+                          ? []
+                          : flocks.map((Flock flock) {
+                              return DropdownMenuItem<Flock>(
+                                value: flock,
+                                child: Text(flock.name),
+                              );
+                            }).toList(),
+                      onChanged: flocksLoading
+                          ? null
+                          : (Flock? newValue) {
+                              setState(() {
+                                _selectedFlock = newValue;
+                              });
+                            },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please select a flock';
+                        }
+                        return null;
+                      },
+                      isLoading: flocksLoading,
+                      loadingMessage: 'Loading flocks...',
+                      emptyMessage: flockState.error != null
+                          ? 'Error: ${flockState.error}'
+                          : 'No flocks found. Please add a flock first.',
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Sale Date
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sale Date *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    GestureDetector(
+                      onTap: () => _selectSaleDate(context),
+                      child: AbsorbPointer(
+                        child: TextFormField(
+                          controller: TextEditingController(
+                            text: _selectedSaleDate == null
+                                ? ''
+                                : '${_selectedSaleDate!.toLocal()}'.split(
+                                    ' ',
+                                  )[0],
+                          ),
+                          style: TextStyle(fontSize: 14.sp),
+                          decoration:
+                              InputTheme.dateDecoration(
+                                label: '',
+                                hint: 'DD/MM/YYYY',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.never,
+                              ),
                           validator: (value) {
-                            if (value == null) {
-                              return 'Please select a flock';
+                            if (_selectedSaleDate == null) {
+                              return 'Sale Date is required';
                             }
                             return null;
                           },
-                          isLoading: flocksLoading,
-                          loadingMessage: 'Loading flocks...',
-                          emptyMessage: flockState.error != null
-                              ? 'Error: ${flockState.error}'
-                              : 'No flocks found. Please add a flock first.',
                         ),
-                        const SizedBox(height: 16),
-                        GestureDetector(
-                          onTap: () => _selectSaleDate(context),
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              controller: TextEditingController(
-                                text: _selectedSaleDate == null
-                                    ? ''
-                                    : '${_selectedSaleDate!.toLocal()}'.split(
-                                        ' ',
-                                      )[0],
-                              ),
-                              decoration: InputTheme.dateDecoration(
-                                label: 'Sale Date *',
-                                hint: 'DD/MM/YYYY',
-                              ),
-                              validator: (value) {
-                                if (_selectedSaleDate == null) {
-                                  return 'Sale Date is required';
-                                }
-                                return null;
-                              },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Product
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Product *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _productController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration:
+                          InputTheme.standardDecoration(
+                            label: '',
+                            hint: 'Enter product name',
+                          ).copyWith(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 14.h,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Product is required';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Customer dropdown
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Customer *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    CustomDropdownButtonFormField<Customer>(
+                      value: _selectedCustomer,
+                      decoration: InputTheme.dropdownDecoration(label: '')
+                          .copyWith(
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+                      items: customersLoading
+                          ? []
+                          : customers.map((Customer customer) {
+                              return DropdownMenuItem<Customer>(
+                                value: customer,
+                                child: Text(customer.name),
+                              );
+                            }).toList(),
+                      onChanged: customersLoading
+                          ? null
+                          : (Customer? newValue) {
+                              setState(() {
+                                _selectedCustomer = newValue;
+                              });
+                            },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please select a customer';
+                        }
+                        return null;
+                      },
+                      isLoading: customersLoading,
+                      loadingMessage: 'Loading customers...',
+                      emptyMessage: customerState.error != null
+                          ? 'Error: ${customerState.error}'
+                          : 'No customers found. Please add a customer first.',
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Description
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sale Description (Optional)',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _saleDescriptionController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration:
+                          InputTheme.textAreaDecoration(
+                            label: '',
+                            hint: 'Enter notes...',
+                          ).copyWith(
+                            contentPadding: EdgeInsets.all(12.w),
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Quantity
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quantity *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _quantityController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration:
+                          InputTheme.standardDecoration(
+                            label: '',
+                            hint: 'Enter quantity',
+                          ).copyWith(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 14.h,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Quantity is required';
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Unit Price
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Unit Price *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _unitPriceController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration:
+                          InputTheme.standardDecoration(
+                            label: '',
+                            hint: 'Enter unit price',
+                          ).copyWith(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 14.h,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Unit Price is required';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Total Amount Display
+                Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total Amount:',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      Text(
+                        'GH₵${_totalAmount.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[900],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                // Payment Method
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Payment Method *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    DropdownButtonFormField<String>(
+                      value: _selectedPaymentMethod,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.dropdownDecoration(label: '')
+                          .copyWith(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 14.h,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+                      items: _paymentMethods.map((String method) {
+                        return DropdownMenuItem<String>(
+                          value: method,
+                          child: Text(method),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedPaymentMethod = newValue;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please select a payment method';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                // Submit button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF14B8A6), // Teal-green
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isLoading
+                        ? const LoadingWidget.small()
+                        : Text(
+                            _isEditMode ? 'Update Sale' : 'Save Sale',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _productController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Product *',
-                            hint: 'Enter product name',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Product is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _quantityController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Quantity *',
-                            hint: 'Enter quantity',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Quantity is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _unitPriceController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Unit Price *',
-                            hint: 'Enter unit price',
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Unit Price is required';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Total Amount: ${_totalAmount.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedPaymentMethod,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Payment Method *',
-                          ),
-                          items: _paymentMethods.map((String method) {
-                            return DropdownMenuItem<String>(
-                              value: method,
-                              child: Text(method),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _selectedPaymentMethod = newValue;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a payment method';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        CustomDropdownButtonFormField<Customer>(
-                          value: _selectedCustomer,
-                          decoration: InputTheme.dropdownDecoration(
-                            label: 'Customer *',
-                          ),
-                          items: customersLoading
-                              ? []
-                              : customers.map((Customer customer) {
-                                  return DropdownMenuItem<Customer>(
-                                    value: customer,
-                                    child: Text(customer.name),
-                                  );
-                                }).toList(),
-                          onChanged: customersLoading
-                              ? null
-                              : (Customer? newValue) {
-                                  setState(() {
-                                    _selectedCustomer = newValue;
-                                  });
-                                },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a customer';
-                            }
-                            return null;
-                          },
-                          isLoading: customersLoading,
-                          loadingMessage: 'Loading customers...',
-                          emptyMessage: customerState.error != null
-                              ? 'Error: ${customerState.error}'
-                              : 'No customers found. Please add a customer first.',
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _saleDescriptionController,
-                          decoration: InputTheme.textAreaDecoration(
-                            label: 'Sale Description (Optional)',
-                            hint: 'Enter notes...',
-                          ),
-                          maxLines: 3,
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: isLoading ? null : _submitForm,
-                            style: FormButtonStyle.primary(),
-                            child: isLoading
-                                ? const SizedBox(
-                                    child: LoadingWidget.small(),
-                                  )
-                                : const Text(
-                                    'Save Record',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  ),
                 ),
+                SizedBox(height: 24.h),
               ],
             ),
           ),

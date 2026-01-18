@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../domain/entities/customer.dart';
 import '../../../../../presentation/widgets/base_page_screen.dart';
 import '../../../../../presentation/widgets/empty_state_widget.dart';
-import '../../../../../presentation/widgets/info_item_widget.dart';
 import '../../../../../presentation/widgets/loading_widget.dart';
+import '../../../../../presentation/widgets/unified_list_card_widget.dart';
 import '../../../../../application/providers/customer_providers.dart';
 import '../../../../../presentation/screens/add_customer_screen.dart';
+import '../../../../../presentation/widgets/ereceipt_detail_widget.dart';
+import '../../../../../presentation/widgets/asset_image_widget.dart';
 
-/// Customers Screen - Main customer management interface
-/// Matches the frontend FarmArchive design exactly
 class CustomersScreen extends ConsumerStatefulWidget {
   final Function(String) onNavigate;
   final VoidCallback onLogout;
@@ -49,108 +49,70 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   }
 
   void _showCustomerDetail(Customer customer) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Customer Details',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  InfoItemWidget(
-                    icon: Icons.person_outline,
-                    label: 'Name',
-                    value: customer.name,
-                  ),
-                  if (customer.contactEmail != null && customer.contactEmail!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.email_outlined,
-                      label: 'Email',
-                      value: customer.contactEmail!,
-                    ),
-                  ],
-                  if (customer.contactPhone != null && customer.contactPhone!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.phone_outlined,
-                      label: 'Phone',
-                      value: customer.contactPhone!,
-                    ),
-                  ],
-                  if (customer.city != null && customer.city!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.location_city_outlined,
-                      label: 'City',
-                      value: customer.city!,
-                    ),
-                  ],
-                  if (customer.address != null && customer.address!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.location_on_outlined,
-                      label: 'Address',
-                      value: customer.address!,
-                    ),
-                  ],
-                  if (customer.createdDate != null) ...[
-                    const SizedBox(height: 16),
-                    InfoItemWidget(
-                      icon: Icons.calendar_today_outlined,
-                      label: 'Created Date',
-                      value: customer.createdDate!.toLocal().toString().split(' ')[0],
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _navigateToEditCustomer(customer);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Edit Customer'),
-                    ),
-                  ),
-                ],
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EReceiptDetailWidget(
+          title: 'Customer Details',
+          sections: [
+            // Item Card Section
+            DetailSection(
+              type: DetailSectionType.itemCard,
+              title: customer.name,
+              subtitle: customer.city != null && customer.city!.isNotEmpty
+                  ? 'Customer | ${customer.city}'
+                  : 'Customer',
+              footer: customer.createdDate != null
+                  ? 'Created: ${customer.createdDate!.toLocal().toString().split(' ')[0]}'
+                  : null,
+              imageWidget: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: AssetImageWidget(
+                  assetPath: 'assets/icons/CUSTOMER.png',
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-          ),
-        );
-      },
+            // Customer Information Section
+            DetailSection(
+              type: DetailSectionType.infoList,
+              title: 'Customer Information',
+              items: [
+                if (customer.contactEmail != null &&
+                    customer.contactEmail!.isNotEmpty)
+                  DetailItem(label: 'Email', value: customer.contactEmail!),
+                if (customer.contactPhone != null &&
+                    customer.contactPhone!.isNotEmpty)
+                  DetailItem(label: 'Phone', value: customer.contactPhone!),
+                if (customer.city != null && customer.city!.isNotEmpty)
+                  DetailItem(label: 'City', value: customer.city!),
+                if (customer.address != null && customer.address!.isNotEmpty)
+                  DetailItem(label: 'Address', value: customer.address!),
+                if (customer.createdDate != null)
+                  DetailItem(
+                    label: 'Created Date',
+                    value: customer.createdDate!.toLocal().toString().split(
+                      ' ',
+                    )[0],
+                  ),
+              ],
+            ),
+          ],
+          actionButtonLabel: 'Edit Customer',
+          actionButtonColor: const Color(0xFF2563EB),
+          onActionPressed: () {
+            Navigator.of(context).pop();
+            _navigateToEditCustomer(customer);
+          },
+        ),
+      ),
     );
   }
 
@@ -180,7 +142,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     );
 
     if (confirmed == true) {
-      await ref.read(customerControllerProvider.notifier).deleteCustomer(customerId);
+      await ref
+          .read(customerControllerProvider.notifier)
+          .deleteCustomer(customerId);
     }
   }
 
@@ -197,9 +161,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
       onLogout: widget.onLogout,
       pageTitle: 'Customers',
       pageSubtitle: 'Manage your customer database',
-      pageIcon: Icons.people,
+      pageIconAsset: 'assets/icons/CUSTOMER.png',
       iconBackgroundColor: const Color(0xFFF3E8FF), // bg-purple-100
       searchController: _searchController,
+      showSearchInHeader: true, // Show search in page header
       actionButton: ElevatedButton.icon(
         onPressed: _navigateToAddCustomer,
         icon: const Icon(Icons.add, color: Colors.white, size: 16),
@@ -217,7 +182,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     );
   }
 
-  Widget _buildContent(List<Customer> customers, bool isLoading, String? error) {
+  Widget _buildContent(
+    List<Customer> customers,
+    bool isLoading,
+    String? error,
+  ) {
     if (isLoading) {
       return const Center(
         child: Padding(
@@ -264,212 +233,34 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
     // Customers list - Card-based layout
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero, // No padding for end-to-end cards
       itemCount: customers.length,
       itemBuilder: (context, index) {
         final customer = customers[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _CustomerCard(
-            customer: customer,
-            index: index + 1,
-            onViewDetail: () => _showCustomerDetail(customer),
-            onEdit: () => _navigateToEditCustomer(customer),
-            onDelete: () => _deleteCustomer(customer.customerId!),
-          ),
+        final fields = <CardField>[];
+        if (customer.contactEmail != null) {
+          fields.add(CardField(label: 'Email', value: customer.contactEmail!));
+        }
+        if (customer.contactPhone != null) {
+          fields.add(CardField(label: 'Phone', value: customer.contactPhone!));
+        }
+        if (customer.city != null) {
+          fields.add(CardField(label: 'City', value: customer.city!));
+        }
+        if (customer.address != null) {
+          fields.add(CardField(label: 'Address', value: customer.address!));
+        }
+
+        return UnifiedListCardWidget(
+          id: 'CUST-${customer.customerId ?? index + 1}',
+          title: customer.name,
+          fields: fields,
+          onEdit: () => _navigateToEditCustomer(customer),
+          onDelete: () => _deleteCustomer(customer.customerId!),
+          onSend: () => _showCustomerDetail(customer),
+          sendButtonLabel: 'View Details',
         );
       },
-    );
-  }
-}
-
-/// Customer Card Widget - Card-based design inspired by modern UI
-class _CustomerCard extends StatelessWidget {
-  final Customer customer;
-  final int index;
-  final VoidCallback onViewDetail;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _CustomerCard({
-    required this.customer,
-    required this.index,
-    required this.onViewDetail,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with number and title
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$index',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    customer.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      onEdit();
-                    } else if (value == 'delete') {
-                      onDelete();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Edit'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Delete', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Info items with icons
-            if (customer.contactEmail != null) ...[
-              _InfoItem(
-                icon: Icons.email_outlined,
-                label: 'Email',
-                value: customer.contactEmail!,
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (customer.contactPhone != null) ...[
-              _InfoItem(
-                icon: Icons.phone_outlined,
-                label: 'Phone',
-                value: customer.contactPhone!,
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (customer.city != null) ...[
-              _InfoItem(
-                icon: Icons.location_city_outlined,
-                label: 'City',
-                value: customer.city!,
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (customer.address != null) ...[
-              _InfoItem(
-                icon: Icons.location_on_outlined,
-                label: 'Address',
-                value: customer.address!,
-              ),
-              const SizedBox(height: 16),
-            ],
-            // Action button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onViewDetail,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[100],
-                  foregroundColor: Colors.grey[800],
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('View Details'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Info Item Widget - Displays icon, label, and value
-class _InfoItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _InfoItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: const Color(0xFF0F172A)),
-        const SizedBox(width: 10),
-        Text(
-          '$label: ',
-          style: const TextStyle(
-            fontSize: 15,
-            color: Color(0xFF0F172A),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 }

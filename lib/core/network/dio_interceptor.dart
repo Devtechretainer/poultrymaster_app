@@ -4,13 +4,15 @@ import 'dart:convert';
 import '../../data/models/user_model.dart';
 import '../../domain/entities/user.dart';
 
-
 class AuthInterceptor extends Interceptor {
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
-    const _currentUserKey = 'current_user';
-    final userJson = prefs.getString(_currentUserKey);
+    const currentUserKey = 'current_user';
+    final userJson = prefs.getString(currentUserKey);
 
     if (userJson != null) {
       try {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/states/auth_state.dart';
 import '../widgets/branding_section.dart';
-import '../widgets/loading_widget.dart';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
 import 'home_screen.dart';
@@ -89,9 +89,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       color: Theme.of(context).brightness == Brightness.dark
                           ? const Color(0xFF1A1F2E)
                           : Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 20.h,
                       ),
                       width: double.infinity,
                       child: Column(
@@ -100,7 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           Text(
                             'Poultry Core',
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 28.sp,
                               fontWeight: FontWeight.bold,
                               color:
                                   Theme.of(context).brightness ==
@@ -109,11 +109,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   : const Color(0xFF2C3E50),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4.h),
                           Text(
                             'Farm Management System',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 12.sp,
                               color:
                                   Theme.of(context).brightness ==
                                       Brightness.dark
@@ -129,9 +129,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       color: Theme.of(context).brightness == Brightness.dark
                           ? const Color(0xFF1A1F2E)
                           : Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 24,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 24.h,
                       ),
                       width: double.infinity,
                       child: _buildLoginForm(
@@ -156,9 +156,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   color: Theme.of(context).brightness == Brightness.dark
                       ? const Color(0xFF1A1F2E)
                       : Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 60,
-                    vertical: 40,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 60.w,
+                    vertical: 40.h,
                   ),
                   child: _buildLoginForm(context, authState, isMobile: false),
                 ),
@@ -175,9 +175,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     AuthState authState, {
     bool isMobile = false,
   }) {
-    final iconSize = isMobile ? 50.0 : 60.0;
-    final titleSize = isMobile ? 24.0 : 28.0;
-    final spacing = isMobile ? 20.0 : 32.0;
+    final iconSize = isMobile ? 50.w : 60.w;
+    final titleSize = isMobile ? 24.sp : 28.sp;
+    final spacing = isMobile ? 20.h : 32.h;
 
     return Form(
       key: _formKey,
@@ -188,11 +188,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             : MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(height: isMobile ? 8 : 0),
+          SizedBox(height: isMobile ? 8.h : 0),
           // Icon
           Center(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               child: Image.asset(
                 'images/farmer-illustration.png',
                 width: iconSize,
@@ -201,7 +201,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-          SizedBox(height: isMobile ? 16 : 24),
+          SizedBox(height: isMobile ? 16.h : 24.h),
           // Title
           Text(
             'Sign In',
@@ -222,6 +222,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white
                   : const Color(0xFF1F2937),
+              fontSize: 14.sp,
             ),
             decoration: InputDecoration(
               labelText: 'Username or Email',
@@ -229,13 +230,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 color: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white70
                     : const Color(0xFF6B7280),
+                fontSize: 14.sp,
               ),
               filled: true,
               fillColor: Theme.of(context).brightness == Brightness.dark
                   ? const Color(0x80334155)
                   : const Color(0xFFE8EEF6),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? const Color(0xFF475569)
@@ -243,23 +245,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ), // slate-600 / slate-300
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color(0xFFFF7A00),
-                  width: 1.5,
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide(
+                  color: const Color(0xFFFF7A00),
+                  width: 1.5.w,
                 ), // orange-500
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? const Color(0xFF475569)
                       : const Color(0xFFCBD5E1),
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 16.h,
               ),
             ),
             validator: (value) {
@@ -269,7 +271,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // Password field
           TextFormField(
             controller: _passwordController,
@@ -278,6 +280,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               color: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white
                   : const Color(0xFF1F2937),
+              fontSize: 14.sp,
             ),
             decoration: InputDecoration(
               labelText: 'Password',
@@ -285,13 +288,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 color: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white70
                     : const Color(0xFF6B7280),
+                fontSize: 14.sp,
               ),
               filled: true,
               fillColor: Theme.of(context).brightness == Brightness.dark
                   ? const Color(0x80334155)
                   : const Color(0xFFE8EEF6),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? const Color(0xFF475569)
@@ -299,23 +303,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ), // slate / light
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color(0xFFFF7A00),
-                  width: 1.5,
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide(
+                  color: const Color(0xFFFF7A00),
+                  width: 1.5.w,
                 ), // orange-500
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 borderSide: BorderSide(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? const Color(0xFF475569)
                       : const Color(0xFFCBD5E1),
                 ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 16.h,
               ),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -338,11 +342,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // Remember me and Forgot password - Responsive layout
           LayoutBuilder(
             builder: (context, constraints) {
-              final isNarrow = constraints.maxWidth < 350;
+              final isNarrow = constraints.maxWidth < 350.w;
 
               if (isNarrow) {
                 // Stack vertically on very narrow screens
@@ -360,15 +364,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           },
                           fillColor: WidgetStateProperty.all(Colors.orange),
                         ),
-                        const Flexible(
+                        Flexible(
                           child: Text(
                             'Remember me',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8.h),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -380,9 +387,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           );
                         },
-                        child: const Text(
+                        child: Text(
                           'Forgot password?',
-                          style: TextStyle(color: Colors.orange),
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 14.sp,
+                          ),
                         ),
                       ),
                     ),
@@ -412,6 +422,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
                               : const Color(0xFF1F2937),
+                          fontSize: 14.sp,
                         ),
                       ),
                     ],
@@ -426,9 +437,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         'Forgot password?',
-                        style: TextStyle(color: Colors.orange),
+                        style: TextStyle(color: Colors.orange, fontSize: 14.sp),
                       ),
                     ),
                   ),
@@ -436,31 +447,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               );
             },
           ),
-          SizedBox(height: isMobile ? 20 : 24),
+          SizedBox(height: isMobile ? 20.h : 24.h),
           // Sign In button
           SizedBox(
-            height: isMobile ? 48 : 50,
+            height: isMobile ? 48.h : 50.h,
             child: ElevatedButton(
               onPressed: authState.isLoading ? null : _handleLogin,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
               child: authState.isLoading
-                  ? const SizedBox(child: LoadingWidget.small())
-                  : const Text(
+                  ? SizedBox(
+                      width: 20.w,
+                      height: 20.h,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.w,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
+                      ),
+                    )
+                  : Text(
                       'Sign In',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
             ),
           ),
-          SizedBox(height: isMobile ? 20 : 24),
+          SizedBox(height: isMobile ? 20.h : 24.h),
           // Sign up link
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -469,7 +489,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 'Not registered?',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: isMobile ? 13 : 14,
+                  fontSize: isMobile ? 13.sp : 14.sp,
                 ),
               ),
               TextButton(
@@ -483,13 +503,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   'Create an account',
                   style: TextStyle(
                     color: Colors.orange,
-                    fontSize: isMobile ? 13 : 14,
+                    fontSize: isMobile ? 13.sp : 14.sp,
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: isMobile ? 16 : 0),
+          SizedBox(height: isMobile ? 16.h : 0),
         ],
       ),
     );

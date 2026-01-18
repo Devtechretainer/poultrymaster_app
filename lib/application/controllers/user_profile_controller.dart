@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/user.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/usecases/create_user_profile_usecase.dart';
 import '../../domain/usecases/delete_user_profile_usecase.dart';
@@ -84,8 +83,9 @@ class UserProfileController extends StateNotifier<UserProfileState> {
   Future<void> findUserProfileByUsername(String normalizedUserName) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final userProfile =
-          await findUserProfileByUsernameUseCase(normalizedUserName);
+      final userProfile = await findUserProfileByUsernameUseCase(
+        normalizedUserName,
+      );
       state = state.copyWith(isLoading: false, userProfile: userProfile);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

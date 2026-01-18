@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/customer_providers.dart';
 import '../../domain/entities/customer.dart';
@@ -125,130 +126,247 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     final title = _isEditMode ? 'Edit Customer' : 'Add Customer';
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F5F9), // bg-slate-100
       appBar: AppBar(
-        title: Text(title),
-        backgroundColor: const Color(0xFF0F172A),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.grey[900], size: 24.sp),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[900],
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: Container(
-        color: Colors.grey[100],
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Name field (required)
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: InputTheme.standardDecoration(
-                          label: 'Customer Name *',
-                          hint: 'Enter customer name',
-                          prefixIcon: const Icon(
-                            Icons.person,
-                            color: Colors.grey,
+                // Name field (required)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Customer Name *',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _nameController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Enter customer name',
+                        prefixIcon: Icon(
+                          Icons.person,
+                          color: Colors.grey[400],
+                          size: 20.sp,
+                        ),
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Customer name is required';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                      SizedBox(height: 12.h),
+
+                // Email field (optional)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Email',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _emailController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Enter email address',
+                        prefixIcon: Icon(
+                          Icons.email,
+                          color: Colors.grey[400],
+                          size: 20.sp,
+                        ),
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value != null &&
+                            value.trim().isNotEmpty &&
+                            !value.contains('@')) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+                      SizedBox(height: 12.h),
+
+                // Phone field (optional)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Phone',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _phoneController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Enter phone number',
+                        prefixIcon: Icon(
+                          Icons.phone,
+                          color: Colors.grey[400],
+                          size: 20.sp,
+                        ),
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      keyboardType: TextInputType.phone,
+                    ),
+                  ],
+                ),
+                      SizedBox(height: 12.h),
+
+                // Address field (optional)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Address',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _addressController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.textAreaDecoration(
+                        label: '',
+                        hint: 'Enter address',
+                      ).copyWith(
+                        contentPadding: EdgeInsets.all(12.w),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+                      SizedBox(height: 12.h),
+
+                // City field (optional)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'City',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextFormField(
+                      controller: _cityController,
+                      style: TextStyle(fontSize: 14.sp),
+                      decoration: InputTheme.standardDecoration(
+                        label: '',
+                        hint: 'Enter city',
+                        prefixIcon: Icon(
+                          Icons.location_city,
+                          color: Colors.grey[400],
+                          size: 20.sp,
+                        ),
+                      ).copyWith(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 14.h,
+                        ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                      ),
+                    ),
+                  ],
+                ),
+                      SizedBox(height: 12.h),
+
+                // Submit button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF14B8A6), // Teal-green
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isLoading
+                        ? const LoadingWidget.small()
+                        : Text(
+                            _isEditMode ? 'Update Customer' : 'Save Customer',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Customer name is required';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Email field (optional)
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: InputTheme.standardDecoration(
-                          label: 'Email',
-                          hint: 'Enter email address',
-                          prefixIcon: const Icon(
-                            Icons.email,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value != null &&
-                              value.trim().isNotEmpty &&
-                              !value.contains('@')) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Phone field (optional)
-                      TextFormField(
-                        controller: _phoneController,
-                        decoration: InputTheme.standardDecoration(
-                          label: 'Phone',
-                          hint: 'Enter phone number',
-                          prefixIcon: const Icon(
-                            Icons.phone,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        keyboardType: TextInputType.phone,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Address field (optional)
-                      TextFormField(
-                        controller: _addressController,
-                        decoration: InputTheme.textAreaDecoration(
-                          label: 'Address',
-                          hint: 'Enter address',
-                        ),
-                        maxLines: 2,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // City field (optional)
-                      TextFormField(
-                        controller: _cityController,
-                        decoration: InputTheme.standardDecoration(
-                          label: 'City',
-                          hint: 'Enter city',
-                          prefixIcon: const Icon(
-                            Icons.location_city,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Submit button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: isLoading ? null : _submitForm,
-                          style: FormButtonStyle.primary(),
-                          child: isLoading
-                              ? const LoadingWidget.small()
-                              : Text(
-                                  _isEditMode
-                                      ? 'Update Customer'
-                                      : 'Save Record',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
+                SizedBox(height: 24.h),
               ],
             ),
           ),

@@ -74,7 +74,7 @@ class DashboardController extends StateNotifier<DashboardState> {
       ),
       SummaryCard(
         title: 'TOTAL SALES',
-        value: 'GH₵${summary.totalSales.toStringAsFixed(2)}',
+        value: '₵${summary.totalSales.toStringAsFixed(2)}',
         trend: null,
         isPositiveTrend: true,
         icon: Icons.attach_money,
@@ -83,7 +83,7 @@ class DashboardController extends StateNotifier<DashboardState> {
       ),
       SummaryCard(
         title: 'THIS MONTH SALES',
-        value: 'GH₵${summary.thisMonthSales.toStringAsFixed(2)}',
+        value: '₵${summary.thisMonthSales.toStringAsFixed(2)}',
         trend: null,
         isPositiveTrend: true,
         icon: Icons.bar_chart,
@@ -92,7 +92,7 @@ class DashboardController extends StateNotifier<DashboardState> {
       ),
       SummaryCard(
         title: 'AVERAGE SALE',
-        value: 'GH₵${summary.averageSale.toStringAsFixed(2)}',
+        value: '₵${summary.averageSale.toStringAsFixed(2)}',
         trend: null,
         isPositiveTrend: true,
         icon: Icons.account_balance_wallet,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dashboard_sidebar.dart';
 import 'dashboard_header.dart';
+import 'asset_image_widget.dart';
 
 /// Base Page Screen Template
 /// Matches the frontend FarmArchive design exactly
@@ -10,13 +12,17 @@ class BasePageScreen extends StatelessWidget {
   final VoidCallback onLogout;
   final String pageTitle;
   final String pageSubtitle;
-  final IconData pageIcon;
+  final IconData? pageIcon;
+  final String?
+  pageIconAsset; // Asset path for custom icons (e.g., 'assets/icons/egg.png')
   final Color? iconBackgroundColor;
   final Widget? actionButton;
   final Widget child;
   final TextEditingController? searchController;
   final String? username;
   final String? roleLabel;
+  final bool
+  showSearchInHeader; // Show search in page header (for list screens)
 
   const BasePageScreen({
     super.key,
@@ -25,13 +31,16 @@ class BasePageScreen extends StatelessWidget {
     required this.onLogout,
     required this.pageTitle,
     required this.pageSubtitle,
-    required this.pageIcon,
+    this.pageIcon,
+    this.pageIconAsset,
     this.iconBackgroundColor,
     this.actionButton,
     required this.child,
     this.searchController,
     this.username,
     this.roleLabel,
+    this.showSearchInHeader =
+        false, // Default false, set to true for list screens
   });
 
   @override
@@ -90,7 +99,9 @@ class BasePageScreen extends StatelessWidget {
       children: [
         // Header Bar
         DashboardHeader(
-          searchController: searchController,
+          searchController: showSearchInHeader
+              ? null
+              : searchController, // Only show search in header for dashboard
           username: username,
           roleLabel: roleLabel,
           showMenuButton: isMobile, // Show menu button on mobile
@@ -127,13 +138,21 @@ class BasePageScreen extends StatelessWidget {
                                       const Color(0xFFF3E8FF),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(
-                                  pageIcon,
-                                  color: iconBackgroundColor != null
-                                      ? Colors.white
-                                      : const Color(0xFF9333EA),
-                                  size: 20,
-                                ),
+                                child: pageIconAsset != null
+                                    ? AssetImageWidget.icon(
+                                        assetPath: pageIconAsset!,
+                                        size: 24,
+                                        padding: const EdgeInsets.all(8.0),
+                                      )
+                                    : pageIcon != null
+                                     ? Icon(
+                                         pageIcon!,
+                                         color: iconBackgroundColor != null
+                                             ? Colors.white
+                                             : const Color(0xFF9333EA),
+                                         size: 20,
+                                       )
+                                     : const SizedBox.shrink(),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -193,13 +212,21 @@ class BasePageScreen extends StatelessWidget {
                                       const Color(0xFFF3E8FF),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Icon(
-                                  pageIcon,
-                                  color: iconBackgroundColor != null
-                                      ? Colors.white
-                                      : const Color(0xFF9333EA),
-                                  size: 20,
-                                ),
+                                child: pageIconAsset != null
+                                    ? AssetImageWidget.icon(
+                                        assetPath: pageIconAsset!,
+                                        size: 24,
+                                        padding: const EdgeInsets.all(8.0),
+                                      )
+                                    : pageIcon != null
+                                     ? Icon(
+                                         pageIcon!,
+                                         color: iconBackgroundColor != null
+                                             ? Colors.white
+                                             : const Color(0xFF9333EA),
+                                         size: 20,
+                                       )
+                                     : const SizedBox.shrink(),
                               ),
                               const SizedBox(width: 12),
                               Flexible(
@@ -238,10 +265,71 @@ class BasePageScreen extends StatelessWidget {
                   },
                 ),
 
-                const SizedBox(height: 24),
+                // Search Bar in Header (for list screens only)
+                if (showSearchInHeader && searchController != null) ...[
+                  SizedBox(height: 12.h),
+                  _buildSearchBar(context, isMobile),
+                  SizedBox(height: 12.h),
+                ] else
+                  SizedBox(height: 20.h),
                 // Page Content
                 Expanded(child: child),
               ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context, bool isMobile) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 40.h,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(color: Colors.grey[300]!, width: 1.w),
+            ),
+            child: TextField(
+              controller: searchController,
+              style: TextStyle(color: Colors.grey[800], fontSize: 13.sp),
+              decoration: InputDecoration(
+                hintText: 'Search here...',
+                hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13.sp),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 10.h,
+                ),
+                suffixIcon: Icon(
+                  Icons.search,
+                  color: Colors.grey[400],
+                  size: 18.sp,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: 10.w),
+        // Filter button (orange square button)
+        Container(
+          width: 40.w,
+          height: 40.w,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFF7A00), // Orange color
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                // TODO: Implement filter functionality
+              },
+              borderRadius: BorderRadius.circular(10.r),
+              child: Icon(Icons.filter_list, color: Colors.white, size: 20.sp),
             ),
           ),
         ),

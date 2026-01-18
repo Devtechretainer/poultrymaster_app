@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/providers/house_providers.dart';
 import '../../domain/entities/house.dart';
@@ -125,50 +126,113 @@ class _AddEditHouseScreenState extends ConsumerState<AddEditHouseScreen> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextFormField(
-                          controller: _houseNameController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'House Name *',
-                            hint: 'Enter house name',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'House name is required';
-                            }
-                            return null;
-                          },
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'House Name *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _houseNameController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter house name',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'House name is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _capacityController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Capacity *',
-                            hint: 'Enter number',
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Capacity is required';
-                            }
-                            if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
-                            }
-                            return null;
-                          },
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Capacity *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _capacityController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter number',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Capacity is required';
+                                }
+                                if (int.tryParse(value) == null) {
+                                  return 'Please enter a valid number';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _locationController,
-                          decoration: InputTheme.standardDecoration(
-                            label: 'Location *',
-                            hint: 'Enter location',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Location is required';
-                            }
-                            return null;
-                          },
+                        SizedBox(height: 12.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Location *',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextFormField(
+                              controller: _locationController,
+                              style: TextStyle(fontSize: 14.sp),
+                              decoration: InputTheme.standardDecoration(
+                                label: '',
+                                hint: 'Enter location',
+                              ).copyWith(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 14.h,
+                                ),
+                                floatingLabelBehavior: FloatingLabelBehavior.never,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Location is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 24),
                         SizedBox(

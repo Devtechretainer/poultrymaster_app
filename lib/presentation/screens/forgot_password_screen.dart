@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers/auth_providers.dart';
 import '../../application/states/auth_state.dart';
 import '../widgets/branding_section.dart';
-import '../widgets/loading_widget.dart';
 
 /// Presentation Screen - Forgot Password UI
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -264,7 +263,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 ),
                                 child: authState.isLoading
                                     ? const SizedBox(
-                                        child: LoadingWidget.small(),
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        ),
                                       )
                                     : Text(
                                         _showOtpField
@@ -463,7 +470,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               ),
                             ),
                             child: authState.isLoading
-                                ? const LoadingWidget.small()
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
                                 : Text(
                                     _showOtpField
                                         ? 'Reset Password'
